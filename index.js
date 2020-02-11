@@ -152,42 +152,9 @@ app.get('/poi', cors(), rateLimiterMiddleware, (req, res, next) => {
     return next()
 }, queryHandler)
 
-// app.listen(3001, (err) => {
-//     if (err) {
-//         console.error(err)
-//         process.exit(1)
-//     } else {
-//         // console.log(`Running on ${process.env.PORT || 5555}`)
-//         console.log(`Running on ${3001}`)
-//     }
-// })
-
-// Choose the port and start the server
-// const PORT = process.env.PORT || 5000
-// app.listen(PORT, () => {
-//     console.log(`Mixing it up on port ${PORT}`)
-// })
-
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname + '/client/build/index.html'));
 });
-
-// const path = require('path')
-// Serve static files from the React frontend app
-// app.use(express.static(path.join(__dirname, 'client/build')))
-// // Anything that doesn't match the above, send back index.html
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname + '/client/build/index.html'))
-// })
-
-// if (process.env.NODE_ENV === 'production') {
-//     //set static folder
-//     app.use(express.static(path.join(__dirname, 'client/build')))
-//     // app.use(express.static('client/build'));
-// }
-// app.get('*', (req, res) => {
-//     res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-// });
 
 app.listen(process.env.PORT || 3001, (err) => {
     if (err) {

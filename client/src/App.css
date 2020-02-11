@@ -43,7 +43,7 @@ textarea {
 /* GENERAL STYLES */
 * {
     /* border: 1px solid crimson; */
-    text-align: center;
+    /* text-align: center; */
 }
 /* a {
   font-size: 0;
@@ -68,6 +68,7 @@ body {
 h1 {
   font-size: 4.0rem;
   letter-spacing: 3px;
+  text-align: center;
 }
 
 /* HEADER STYLES */
@@ -168,7 +169,8 @@ label {
   /* background-color: darkmagenta; */
   /* height: 388px; */
   /* overflow: hidden; */
-  /* margin-top: 80px; */
+  padding-top: 20px;
+
 }
 
 .graphContainer button {
@@ -176,12 +178,24 @@ label {
     top: 20px;
     z-index: 20;
     right: 0;
+    /* padding-top: 5vh; */
+    text-transform: uppercase;
+}
+
+.graphAnalysis {
+  /* text-align: left; */
+  margin-top: 15px;
+  
 }
 
 /* FOOTER STYLES */
 footer {
   height: 5vh;
   background-color: black;
+  padding: 5px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* "gh": "^2.8.3",

@@ -299,7 +299,14 @@ class SelectData extends Component {
                                 return { label: item.date.slice(0, 10), y: parseInt(item.events) }
                             })
                             console.log(graphData);
-                            this.props.getVariables(graphData)
+                            // this.props.getVariables(graphData)
+
+                            // graph analysis
+                            const analysis = "From this graph you can see the total number of ads being seen by customers/users each day (Assumption: An 'event' refers to a customer seeing an ad)."
+                            const graphDataPlusAnalysis = [graphData, analysis]
+                            // send the graph data up to App.js
+                            this.props.getVariables(graphDataPlusAnalysis)
+
                         }).catch((error) => {
                             console.log(error);
                             // Api endpoint rate-limiting alert
@@ -355,8 +362,12 @@ class SelectData extends Component {
                                 return { label: item[0], y: item[1].averageEvents }
                             })
                             console.log(graphData);
+                            // graph analysis
+                            const analysis = "For each bar, on average this many ads are being seen by users at that point in the day (Assumption: An 'event' refers to a customer seeing an ad)."
+                            const graphDataPlusAnalysis = [graphData, analysis]
                             // send the graph data up to App.js
-                            this.props.getVariables(graphData)
+                            this.props.getVariables(graphDataPlusAnalysis)
+                            
                         })
 
                 }
