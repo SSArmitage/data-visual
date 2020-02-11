@@ -18,11 +18,11 @@ app.use(session({
     saveUninitialized: true,
     resave: true
 }));
-
+// Serve static files from React frontend app
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 // global session
-var sess;
+let sess;
 
 // configs come from standard PostgreSQL env vars
 // https://www.postgresql.org/docs/9.6/static/libpq-envars.html
@@ -33,12 +33,6 @@ const DATABASE = 'work_samples'
 const USER = 'readonly'
 const PASSWORD = 'w2UIO@#bg532!'
 
-// app.use(bodyParser.json())
-// app.use(
-//   bodyParser.urlencoded({
-//     extended: true,
-//   })
-// )
 
 const pool = new pg.Pool({
     user: USER,
