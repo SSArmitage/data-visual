@@ -9,14 +9,6 @@ const pino = require('express-pino-logger')();
 const app = express()
 const session = require('express-session');
 
-const path = require('path')
-// Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, 'client/build')))
-// Anything that doesn't match the above, send back index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '/client/build/index.html'))
-})
-
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(pino);
@@ -33,7 +25,7 @@ var sess;
 // https://www.postgresql.org/docs/9.6/static/libpq-envars.html
 // put in the .env file later
 const HOST = 'work-samples-db.cx4wctygygyq.us-east-1.rds.amazonaws.com'
-const PORT = 5432
+// const PORT = 5432
 const DATABASE = 'work_samples'
 const USER = 'readonly'
 const PASSWORD = 'w2UIO@#bg532!'
@@ -174,12 +166,18 @@ app.listen(3001, (err) => {
 })
 
 // Choose the port and start the server
-// const PORT = process.env.PORT || 5000
-// app.listen(PORT, () => {
-//     console.log(`Mixing it up on port ${PORT}`)
-// })
+const PORT = process.env.PORT || 5000
+app.listen(PORT, () => {
+    console.log(`Mixing it up on port ${PORT}`)
+})
 
-
+const path = require('path')
+// Serve static files from the React frontend app
+app.use(express.static(path.join(__dirname, 'client/build')))
+// Anything that doesn't match the above, send back index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/client/build/index.html'))
+})
 
 // last resorts
 process.on('uncaughtException', (err) => {
