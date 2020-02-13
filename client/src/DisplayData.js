@@ -36,9 +36,13 @@ class DisplayData extends Component {
 
         // put data in right format for graph
         const formattedData = {
-            theme: 'dark1',
+            // theme: 'dark1',
+            backgroundColor: "#000000",
             title: {
-                text: graphData.graphTitle
+                text: graphData.graphTitle,
+                fontFamily: 'sans-serif',
+                fontColor: 'whitesmoke',
+                fontSize: 20
             },
             colorSet: 'customColorSet',
             data: [{
@@ -50,11 +54,18 @@ class DisplayData extends Component {
                 interval: 1,
                 // intervalType: "day",
                 labelAngle: 45,
-                labelFontSize: 0
+                labelFontSize: 0,
+                lineColor: 'white',
+                tickColor: 'white',
+                titleFontColor: 'white'
             },
             axisY: {
                 title: graphData.axisYTitle,
-                gridThickness: 0
+                gridThickness: 0,
+                lineColor: 'white',
+                gridColor: 'white',
+                tickColor: 'white',
+                titleFontColor: 'white'
             },
             showInLegend: graphData.showInLegend,
             legendText: graphData.legendText,
@@ -153,14 +164,16 @@ class DisplayData extends Component {
     render() {
         return (
             <div className="graphContainer">
-                <button onClick={this.handleButtonClick}>New Graph</button>
                 <CanvasJSChart
                     options={this.state.options}
                     onRef={ref => this.chart = ref}
                 />
-                <div className="graphAnalysis">
-                    <h3>Graphical Analysis</h3>
-                    <p>{this.props.passVariables[1]}</p>
+                <div class="bottomContainer">
+                    <div className="graphAnalysis">
+                        <h3>Graphical Analysis</h3>
+                        <p>{this.props.passVariables[1]}</p>
+                    </div>
+                    <button onClick={this.handleButtonClick}>New Graph</button>
                 </div>
             </div>
         )

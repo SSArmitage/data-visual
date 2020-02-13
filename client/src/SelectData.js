@@ -280,31 +280,38 @@ class SelectData extends Component {
                     const getData = this.handleApiCall('events', 'daily')
                     getData.then(res => res.json())
                         .then((data) => {
-                            // console.log(data);
+                            // if the data coming back does not include a status code (the user has not exceded the rate limit)
+                            if (!data.code) {
+                                // console.log(data);
 
-                            const graphData = {
-                                graphType: "column",
-                                graphTitle: "Total Events vs. Date",
-                                axisXTitle: "Date",
-                                axisYTitle: "Total Events",
-                                showInLegend: false,
-                                legendText: "",
-                                data: data
+                                const graphData = {
+                                    graphType: "column",
+                                    graphTitle: "Total Events vs. Date",
+                                    axisXTitle: "Date",
+                                    axisYTitle: "Total Events",
+                                    showInLegend: false,
+                                    legendText: "",
+                                    data: data
+                                }
+
+                                // put the data in the right format for the graph
+                                graphData.data = data.map((item) => {
+                                    return { label: item.date.slice(0, 10), y: parseInt(item.events) }
+                                })
+                                // console.log(graphData);
+                                // this.props.getVariables(graphData)
+
+                                // graph analysis
+                                const analysis = "From this graph you can see the total number of ads being seen by customers/users each day (Assumption: An 'event' refers to a customer seeing an ad)."
+                                const graphDataPlusAnalysis = [graphData, analysis]
+                                // send the graph data up to App.js
+                                this.props.getVariables(graphDataPlusAnalysis)
+
+                            } else {
+                                // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                               
+                                alert(data.message)
                             }
-
-                            // put the data in the right format for the graph
-                            graphData.data = data.map((item) => {
-                                return { label: item.date.slice(0, 10), y: parseInt(item.events) }
-                            })
-                            // console.log(graphData);
-                            // this.props.getVariables(graphData)
-
-                            // graph analysis
-                            const analysis = "From this graph you can see the total number of ads being seen by customers/users each day (Assumption: An 'event' refers to a customer seeing an ad)."
-                            const graphDataPlusAnalysis = [graphData, analysis]
-                            // send the graph data up to App.js
-                            this.props.getVariables(graphDataPlusAnalysis)
-
                         }).catch((error) => {
                             console.log(error);
                             // Api endpoint rate-limiting alert
@@ -317,7 +324,7 @@ class SelectData extends Component {
                     const getData = this.handleApiCall('events', 'hourly')
                     getData.then(res => res.json())
                         .then((data) => {
-                            // the data coming back does not include a status code (the user has not exceded the rate limit)
+                            // if the data coming back does not include a status code (the user has not exceded the rate limit)
                             if (!data.code) {
                                 // console.log(data);
                                 let countObj = {}
