@@ -15,7 +15,7 @@ class App extends Component {
   }
 
   handleVariables = (variables) => {
-    console.log(variables);
+    // console.log(variables);
 
     this.setState({
       data: {
@@ -26,7 +26,7 @@ class App extends Component {
   }
 
   handleCreateNewGraph = () => {
-    console.log(`New graph time!`);
+    // console.log(`New graph time!`);
     this.setState({
       data: {
         userSelectedVariables: false,

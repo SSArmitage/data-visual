@@ -55,7 +55,7 @@ const rateLimiterMiddleware = (req, res, next) => {
     if (sess.tokens === undefined) {
         // console.log(`I was undefined`);
         // tokens werent assigned, give 20 tokens but remove one for this api call
-        sess.tokens = 5
+        sess.tokens = 2
         // get the timestamp in seconds
         sess.timeStamp = Math.round(new Date().getTime() / 1000)
         console.log('the time is', sess.timeStamp);
@@ -78,11 +78,18 @@ const rateLimiterMiddleware = (req, res, next) => {
         console.log('time difference', timeDifference, 'seconds');
         if (timeDifference > 30) {
             console.log(`I waited 30 seconds`);
-            sess.tokens = 5
+            sess.tokens = 2
             // pass on to the next fxn
             next()
         } else {
-            res.send('You have made too many requests, please wait 30 sec from last request')
+            const timeToWait = 30 - timeDifference;
+            res.status(429).json({
+                code: 429,
+                reason: 'RATE_LIMIT_EXCEEDED',
+                message: `You have made too many requests, please wait ${timeToWait} sec`
+            })
+            // on the client side, conditional statement
+            // if (res.status === 429) => send alert to user
         }
     }
 }

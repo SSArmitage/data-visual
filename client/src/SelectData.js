@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import axios from 'axios';
 
 class SelectData extends Component {
     constructor() {
@@ -123,18 +122,18 @@ class SelectData extends Component {
                 // if user did not select just date and hour => they selected an appropriate combination of checkboxes
                 if (this.state.selector.normal) {
                     // user selected "normal"
-                    console.log(`I selected normal`);
+                    // console.log(`I selected normal`);
                     if (checkboxValues.includes("date") && checkboxValues.includes("hour")) {
                         // user selected date + hour => correct combo
-                        console.log(`I chose correct`);
+                        // console.log(`I chose correct`);
                         let data = {};
                         data.checkboxValues = checkboxValues;
                         data.selector = this.state.selector;
-                        console.log(data);
+                        // console.log(data);
                         // send the data to the handleData() fxn 
                         this.handleData(data)
                     } else {
-                        console.log(`I chose incorrect`);
+                        // console.log(`I chose incorrect`);
                         // user did not select date + hour => incorrect combo
                         alert("Events-Normal can only be combined with date + hour, please select again.")
                     }
@@ -152,11 +151,11 @@ class SelectData extends Component {
                         }
                     })
                 } else {
-                    console.log(`I did not select normal`);
+                    // console.log(`I did not select normal`);
                     // user did not select "normal"
                     // check that if events, impressions, clicks, or revenue were chosen, that they have also chosen a selector average or total
                     if (this.state.selector.average || this.state.selector.total) {
-                        console.log(`I selected avg or total`);
+                        // console.log(`I selected avg or total`);
                         // the user either selected average or total
 
                         // if the user selected date + events-average
@@ -164,13 +163,13 @@ class SelectData extends Component {
                             alert("You cannot use Date + Hours + Events-Average, or Date + Events-Average for graphical comparison, please select again.")
                             // the user did not select date + events-average
                         } else {
-                            console.log(`I did not choose  date + evnt`);
+                            // console.log(`I did not choose  date + evnt`);
                             let data = {};
                             data.checkboxValues = checkboxValues;
                             data.selector = this.state.selector;
 
                             // send the data to the handleData() fxn 
-                            console.log(data);
+                            // console.log(data);
                             this.handleData(data)
                         }
 
@@ -229,24 +228,24 @@ class SelectData extends Component {
 
                     if (variables.selector.total) {
                         // total events vs total impressions, for each day
-                        console.log(`total impressions`);
+                        // console.log(`total impressions`);
                         this.handleApiCall('events', 'daily', 'stats')
 
                     } else if (variables.selector.average) {
                         // avg events vs avg impressions, for each hour
-                        console.log(`average impressions`);
+                        // console.log(`average impressions`);
                         this.handleApiCall('events', 'hourly', 'stats')
                     }
                 } else if (variables.checkboxValues.includes("clicks")) {
 
                     if (variables.selector.total) {
                         // total clicks vs total events, for each day
-                        console.log(`total clicks`);
+                        // console.log(`total clicks`);
                         this.handleApiCall('events', 'daily', 'stats')
 
                     } else if (variables.selector.average) {
                         // avg clicks vs avg events, for each hour
-                        console.log(`average clicks`);
+                        // console.log(`average clicks`);
                         this.handleApiCall('events', 'hourly', 'stats')
                     }
 
@@ -254,12 +253,12 @@ class SelectData extends Component {
 
                     if (variables.selector.total) {
                         // total revenue vs total events, for each day
-                        console.log(`total revenue`);
+                        // console.log(`total revenue`);
                         this.handleApiCall('events', 'daily', 'stats')
 
                     } else if (variables.selector.average) {
                         // avg revenue vs avg events, for each hour
-                        console.log(`average revenue`);
+                        // console.log(`average revenue`);
                         this.handleApiCall('events', 'hourly', 'stats')
                     }
                 }
@@ -279,10 +278,9 @@ class SelectData extends Component {
                 } else if (variables.checkboxValues.includes("date")) {
                     // total events vs date
                     const getData = this.handleApiCall('events', 'daily')
-                    console.log(`Hellloooo`);
                     getData.then(res => res.json())
                         .then((data) => {
-                            console.log(data);
+                            // console.log(data);
 
                             const graphData = {
                                 graphType: "column",
@@ -298,7 +296,7 @@ class SelectData extends Component {
                             graphData.data = data.map((item) => {
                                 return { label: item.date.slice(0, 10), y: parseInt(item.events) }
                             })
-                            console.log(graphData);
+                            // console.log(graphData);
                             // this.props.getVariables(graphData)
 
                             // graph analysis
@@ -310,64 +308,68 @@ class SelectData extends Component {
                         }).catch((error) => {
                             console.log(error);
                             // Api endpoint rate-limiting alert
-                            // alert("You have reached your request limit. Please wait 30 seconds from last request, then try again.")
+                            // if (res.status === 429)
                         })
-                    // have the data back from the api, now need to remove the last part of the date and send it up to app.js
-
                 } else if (variables.checkboxValues.includes("hour")) {
                     // avg events vs hour
                     // this.handleApiCall('events', 'hourly')
 
                     const getData = this.handleApiCall('events', 'hourly')
-                    console.log(`Hellloooo`);
                     getData.then(res => res.json())
                         .then((data) => {
-                            console.log(data);
-                            let countObj = {}
-                            // need the total events for each hour & the number of hour samples, store in countObj 
-                            data.forEach((item) => {
-                                let hour = item.hour
-                                if (!countObj[`${hour}`]) {
-                                    countObj[`${hour}`] = {
-                                        totalEvents: item.events,
-                                        numberOfEvents: 1
+                            // the data coming back does not include a status code (the user has not exceded the rate limit)
+                            if (!data.code) {
+                                // console.log(data);
+                                let countObj = {}
+                                // need the total events for each hour & the number of hour samples, store in countObj 
+                                data.forEach((item) => {
+                                    let hour = item.hour
+                                    if (!countObj[`${hour}`]) {
+                                        countObj[`${hour}`] = {
+                                            totalEvents: item.events,
+                                            numberOfEvents: 1
+                                        }
+                                    } else {
+                                        countObj[`${hour}`].totalEvents = countObj[`${hour}`].totalEvents + item.events
+                                        countObj[`${hour}`].numberOfEvents++
                                     }
-                                } else {
-                                    countObj[`${hour}`].totalEvents = countObj[`${hour}`].totalEvents + item.events
-                                    countObj[`${hour}`].numberOfEvents++
+                                })
+                                // get the average events for each hour
+                                for (let item in countObj) {
+                                    // console.log(countObj[`${item}`]);
+                                    countObj[`${item}`]['averageEvents'] = parseInt(countObj[`${item}`].totalEvents / countObj[`${item}`].numberOfEvents)
                                 }
-                            })
-                            // get the average events for each hour
-                            for (let item in countObj) {
-                                // console.log(countObj[`${item}`]);
-                                countObj[`${item}`]['averageEvents'] = parseInt(countObj[`${item}`].totalEvents / countObj[`${item}`].numberOfEvents)
-                            }
-                            console.log(countObj);
-                            // format the data to send to App.js
-                            const graphData = {
-                                graphType: "column",
-                                graphTitle: "Average Events vs. Hour",
-                                axisXTitle: "Hour (24hr clock)",
-                                axisYTitle: "Average Events",
-                                showInLegend: false,
-                                legendText: "",
-                                data: []
-                            }
-                            console.log(graphData);
-                            // put the data in the right format for the graph
-                            const countArray = Object.entries(countObj)
-                            console.log(countArray);
+                                // console.log(countObj);
+                                // format the data to send to App.js
+                                const graphData = {
+                                    graphType: "column",
+                                    graphTitle: "Average Events vs. Hour",
+                                    axisXTitle: "Hour (24hr clock)",
+                                    axisYTitle: "Average Events",
+                                    showInLegend: false,
+                                    legendText: "",
+                                    data: []
+                                }
+                                // console.log(graphData);
+                                // put the data in the right format for the graph
+                                const countArray = Object.entries(countObj)
+                                // console.log(countArray);
 
-                            graphData.data = countArray.map((item) => {
-                                return { label: item[0], y: item[1].averageEvents }
-                            })
-                            console.log(graphData);
-                            // graph analysis
-                            const analysis = "For each bar, on average this many ads are being seen by users at that point in the day (Assumption: An 'event' refers to a customer seeing an ad)."
-                            const graphDataPlusAnalysis = [graphData, analysis]
-                            // send the graph data up to App.js
-                            this.props.getVariables(graphDataPlusAnalysis)
-                            
+                                graphData.data = countArray.map((item) => {
+                                    return { label: item[0], y: item[1].averageEvents }
+                                })
+                                // console.log(graphData);
+                                // graph analysis
+                                const analysis = "For each bar, on average this many ads are being seen by users at that point in the day (Assumption: An 'event' refers to a customer seeing an ad)."
+                                const graphDataPlusAnalysis = [graphData, analysis]
+                                // send the graph data up to App.js
+                                this.props.getVariables(graphDataPlusAnalysis)
+                            } else {
+                                // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                                alert(data.message)
+                            }
+                        }).catch((error) => {
+                            // console.log(error);
                         })
 
                 }
@@ -460,7 +462,7 @@ class SelectData extends Component {
     handleApiCall = (var1, var2, var3) => {
         // let data;
         if (var3) {
-            console.log(`I am 3 variables`);
+            // console.log(`I am 3 variables`);
             // i.e. /events/daily & /impressions/daily (both share var3)
 
             // const dataOne = fetch(`/${var1}/${var2}`, {
@@ -486,10 +488,8 @@ class SelectData extends Component {
             //     console.log(data);
             // })
 
-            // const data = [dataOne, dataTwo]
-
         } else {
-            console.log(`I am 2 variables`);
+            // console.log(`I am 2 variables`);
 
             // const data = fetch(`/${var1}/${var2}`, {
             // })
@@ -501,9 +501,6 @@ class SelectData extends Component {
             return fetch(`/${var1}/${var2}`)
 
         }
-        // console.log(data);
-
-        // return data
     }
 
     handleChange = (event) => {
@@ -666,18 +663,18 @@ class SelectData extends Component {
                                     <label htmlFor="events">Events</label>
                                     <input type="checkbox" id="events" value="events" className="checkbox" onChange={this.handleChange}></input>
 
-                                    <div class="extraVariableSelectors">
-                                        <div class="extraVariable">
+                                    <div className="extraVariableSelectors">
+                                        <div className="extraVariable">
                                             <label htmlFor="average">Normal</label>
                                             <input type="radio" id="normal" value="eventsNormal" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
                                         </div>
 
-                                        <div class="extraVariable">
+                                        <div className="extraVariable">
                                             <label htmlFor="average">Average</label>
                                             <input type="radio" id="average" value="eventsAverage" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
                                         </div>
 
-                                        <div class="extraVariable">
+                                        <div className="extraVariable">
                                             <label htmlFor="total">Total</label>
                                             <input type="radio" id="total" value="eventsTotal" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
                                         </div>
@@ -692,24 +689,24 @@ class SelectData extends Component {
 
                             {this.state.checkboxesSelected.impressions
                                 ?
-                                <div class="checkboxContainer">
+                                <div className="checkboxContainer">
                                     <label htmlFor="impression">Impressions</label>
                                     <input type="checkbox" id="impressions" value="impressions" className="checkbox" onChange={this.handleChange}></input>
 
-                                    <div class="extraVariableSelectors">
-                                        <div class="extraVariable">
+                                    <div className="extraVariableSelectors">
+                                        <div className="extraVariable">
                                             <label htmlFor="average">Average</label>
                                             <input type="radio" id="average" value="impressionsAverage" className="selectorRadio" name="avgOrTotalTwo" onChange={this.handleChange}></input>
                                         </div>
 
-                                        <div class="extraVariable">
+                                        <div className="extraVariable">
                                             <label htmlFor="total">Total</label>
                                             <input type="radio" id="total" value="impressionsTotal" className="selectorRadio" name="avgOrTotalTwo" onChange={this.handleChange}></input>
                                         </div>
                                     </div>
                                 </div>
                                 :
-                                <div class="checkboxContainer">
+                                <div className="checkboxContainer">
                                     <label htmlFor="impression">Impressions</label>
                                     <input type="checkbox" id="impressions" value="impressions" className="checkbox" onChange={this.handleChange}></input>
                                 </div>
@@ -717,24 +714,24 @@ class SelectData extends Component {
 
                             {this.state.checkboxesSelected.clicks
                                 ?
-                                <div class="checkboxContainer">
+                                <div className="checkboxContainer">
                                     <label htmlFor="clicks">Clicks</label>
                                     <input type="checkbox" id="clicks" value="clicks" className="checkbox" onChange={this.handleChange}></input>
 
-                                    <div class="extraVariableSelectors">
-                                        <div class="extraVariable">
+                                    <div className="extraVariableSelectors">
+                                        <div className="extraVariable">
                                             <label htmlFor="average">Average</label>
                                             <input type="radio" id="average" value="clicksAverage" className="selectorRadio" name="avgOrTotalThree" onChange={this.handleChange}></input>
                                         </div>
 
-                                        <div class="extraVariable">
+                                        <div className="extraVariable">
                                             <label htmlFor="total">Total</label>
                                             <input type="radio" id="total" value="clicksTotal" className="selectorRadio" name="avgOrTotalThree" onChange={this.handleChange}></input>
                                         </div>
                                     </div>
                                 </div>
                                 :
-                                <div class="checkboxContainer">
+                                <div className="checkboxContainer">
                                     <label htmlFor="clicks">Clicks</label>
                                     <input type="checkbox" id="clicks" value="clicks" className="checkbox" onChange={this.handleChange}></input>
                                 </div>
@@ -742,24 +739,24 @@ class SelectData extends Component {
 
                             {this.state.checkboxesSelected.revenue
                                 ?
-                                <div class="checkboxContainer">
+                                <div className="checkboxContainer">
                                     <label htmlFor="revenue">Revenue</label>
                                     <input type="checkbox" id="revenue" value="revenue" className="checkbox" onChange={this.handleChange}></input>
 
-                                    <div class="extraVariableSelectors">
-                                        <div class="extraVariable">
+                                    <div className="extraVariableSelectors">
+                                        <div className="extraVariable">
                                             <label htmlFor="average">Average</label>
                                             <input type="radio" id="average" value="revenueAverage" className="selectorRadio" name="avgOrTotalFour" onChange={this.handleChange}></input>
                                         </div>
 
-                                        <div class="extraVariable">
+                                        <div className="extraVariable">
                                             <label htmlFor="total">Total</label>
                                             <input type="radio" id="total" value="revenueTotal" className="selectorRadio" name="avgOrTotalFour" onChange={this.handleChange}></input>
                                         </div>
                                     </div>
                                 </div>
                                 :
-                                <div class="checkboxContainer">
+                                <div className="checkboxContainer">
                                     <label htmlFor="revenue">Revenue</label>
                                     <input type="checkbox" id="revenue" value="revenue" className="checkbox" onChange={this.handleChange}></input>
                                 </div>

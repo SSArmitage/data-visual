@@ -22,23 +22,11 @@ class DisplayData extends Component {
         // use data as the x,y points for the graph
         // use variables to check which graph needs to be displayed
         const graphData = this.props.passVariables[0];
-        console.log(graphData);
-
-        // console.log(typeof data[0].events);
-
-        // convert strings to numbers
-        // data.forEach((item) => {
-        //     item.events = parseInt(item.events)
-        //     console.log(item.events);
-
-        // })
-        // console.log(data);
+        // console.log(graphData);
 
         // custom color palette
         Canvas.addColorSet('customColorSet', [
-            // "#3183446",
             "#214A63",
-            // "#06004f",
             "#005A84",
             "#3A4E6D",
             "#046FA0",
@@ -78,51 +66,24 @@ class DisplayData extends Component {
             }
         };
 
-        // update the formattedFata object -> will be used to set the graph options
-        // formattedData.title.text = this.props.graphTitle
-        // formattedData.axisX.title = this.props.axisXTitle
-        // formattedData.axisY.title = this.props.axisYTitle
-        // formattedData.data[0].type = this.props.graphType
 
         // add the x and y data points
         // label -> x data, y -> y data
-        // dataPoints = [
+        // i.e. dataPoints = [
         //   {label: "2017-01-02", y: 42},
         //   {label: "2017-01-03", y: 22}
         // ]
 
-
-        // graphData.data.forEach((item, i) => {
-        //     // console.log(item.date);
-        //     // console.log(typeof item.events);
-        //     formattedData.data[0].dataPoints[i] = {
-        //         label: item[`date`],
-        //         y: parseInt(item[`events`])
-        //     }
-        // })
-
         // add the graph data from App.js to the formattedData
         formattedData.data[0].dataPoints = graphData.data
-        console.log(formattedData);
+        // console.log(formattedData);
 
         // set the data into the graph options in state -> will cause the graph to re-render with the user seleced comparison data
         this.setState({
             options: formattedData
         })
 
-
-
-
-        // GET DATA
-        // remove the first item in the array and assign it to variableNames
-        // i.e. now "eventsHourly" is just an array of the date/events
-        // const variableNamesEventsHourly = eventsHourly.shift();
-        // const variableNamesEventsDaily = eventsDaily.shift();
-        // const variableNamesStatsHourly = statsHourly.shift();
-        // const variableNamesStatsDaily = statsDaily.shift();
-        // const variableNamesPoi = poi.shift();
-
-        // PERFORM MATH ON DATA FOR USE IN GRAPHS (need totals and averages for hours and dates)
+        // **** PERFORM MATH ON DATA FOR USE IN GRAPHS (need totals and averages for hours and dates) *** NOT IN THIS COMPONENT ANY MORE, NEED TO MOVE TO SelectData.js
         // 1. GRAB ALL THE EVENTS FOR EACH DAY
         let events = {};
         let n = 1;
@@ -147,6 +108,7 @@ class DisplayData extends Component {
                 if (n < 9) {
                     // TESTING AGAINST "N"
                     // convert the new date string into ar array
+                    // can chain these together to make less verbose
                     let newDateN = [...dateHourEvents[0]];
                     // grab the last character of the date string array
                     let newCharacterN = newDateN[newDateN.length - 1]
@@ -182,13 +144,6 @@ class DisplayData extends Component {
         eventsDaily.forEach((event) => {
             event[1] = parseInt(event[1])
         })
-
-        // send data to the handleData() fxn
-        // right now its just the data for total events per day
-        // const data = {
-        //     eventsDaily: eventsDaily
-        // }
-        // this.handleData(data)
     }
 
     handleButtonClick = () => {
