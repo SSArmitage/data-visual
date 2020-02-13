@@ -73,41 +73,6 @@ h1 {
   
 }
 
-@media (max-width: 700px) {
-    h1 {
-      font-size: 2.5rem;
-    }
-    h2 {
-      font-size: 2.2rem;
-    }
-}
-@media (max-width: 650px) {
-    .variablesContainer {
-      width: 100%;
-    }
-}
-@media (max-width: 500px) {
-    .bottomContainer {
-      flex-direction: column;
-    }
-    .bottomContainer button {
-      margin: 5px 0;
-    }
-} 
-@media (max-width: 400px) {
-    .variablesContainer {
-      font-size: 1.5rem;
-    }
-}
-@media (max-width: 360px) {
-    .wrapper {
-      width: 90%;
-    }
-    /* .variablesContainer {
-      width: 100%;
-    } */
-}
-
 button {
   text-transform: uppercase;
   border-radius: 4px;
@@ -272,7 +237,7 @@ label {
   /* background-image: linear-gradient(90deg, rgba(3, 78, 144, 0.9) 0%, rgba(25, 180, 215, 0.9) 100%); */
 }
 
-.graphContainer button {
+.bottomContainer button {
     margin-left: 15px;
     /* position: absolute;
     top: 20px;
@@ -306,6 +271,41 @@ footer .flexContainer {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* MEDIA QUERIES */
+@media (max-width: 700px) {
+    h1 {
+      font-size: 2.5rem;
+    }
+    h2 {
+      font-size: 2.2rem;
+    }
+}
+@media (max-width: 650px) {
+    .variablesContainer {
+      width: 100%;
+    }
+}
+@media (max-width: 500px) {
+    .bottomContainer {
+      flex-direction: column;
+      text-align: center
+    }
+    .bottomContainer button {
+      margin: 5px 0;
+      /* margin-left: 0; */
+    }
+} 
+@media (max-width: 400px) {
+    .variablesContainer {
+      font-size: 1.5rem;
+    }
+}
+@media (max-width: 360px) {
+    .wrapper {
+      width: 90%;
+    }
 }
 
 
