@@ -22,7 +22,25 @@ class DisplayData extends Component {
         // use data as the x,y points for the graph
         // use variables to check which graph needs to be displayed
         const graphData = this.props.passVariables[0];
-        // console.log(graphData);
+        // console.log(graphData.data[2]);
+        // console.log(graphData.data[1]);
+        // let arr = graphData.data
+        // console.log(arr);
+        // let arrX = [];
+        // let arrY = [];
+        // graphData.data.forEach((item) => {
+        //     // console.log(item);
+        //     arrX.push(item.x)
+        //     arrY.push(item.y)
+        // })
+        // console.log(arrX, arrY);
+        
+
+        for (let item in graphData.data) {
+            // console.log(item);
+            // arrX.push()
+        }
+        
 
         // custom color palette
         Canvas.addColorSet('customColorSet', [
@@ -45,10 +63,25 @@ class DisplayData extends Component {
                 fontSize: 20
             },
             colorSet: 'customColorSet',
+            legend: {
+                verticalAlign: "top",
+                horizontalAlign: "right",
+                fontColor: 'red',
+                dockInsidePlotArea: false
+            },
             data: [{
                 type: graphData.graphType,
                 dataPoints: []
-            }],
+                },
+                {
+                type: 'spline',
+                showInLegend: graphData.showInLegend,
+                lineColor: "red",
+                markerColor: "red",
+                dataPoints: [],
+                legendText: graphData.legendText
+                }
+            ],
             axisX: {
                 title: graphData.axisXTitle,
                 interval: 1,
@@ -69,12 +102,12 @@ class DisplayData extends Component {
             },
             showInLegend: graphData.showInLegend,
             legendText: graphData.legendText,
-            legend: {
-                dockInsidePlotArea: true,
-                horizontalAlign: "right",
-                verticalAlign: "center",
-                fontSize: 15
-            }
+            // legend: {
+            //     dockInsidePlotArea: true,
+            //     horizontalAlign: "right",
+            //     verticalAlign: "center",
+            //     fontSize: 15
+            // }
         };
 
 
@@ -87,6 +120,7 @@ class DisplayData extends Component {
 
         // add the graph data from App.js to the formattedData
         formattedData.data[0].dataPoints = graphData.data
+        formattedData.data[1].dataPoints = graphData.curveFit
         // console.log(formattedData);
 
         // set the data into the graph options in state -> will cause the graph to re-render with the user seleced comparison data
@@ -174,6 +208,7 @@ class DisplayData extends Component {
                         <p>{this.props.passVariables[1]}</p>
                     </div>
                     <button onClick={this.handleButtonClick}>New Graph</button>
+                    {/* <button onclick="download_csv()">Download CSV</button>  */}
                 </div>
             </div>
         )

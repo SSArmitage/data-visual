@@ -10,12 +10,13 @@ class App extends Component {
       data: {
         userSelectedVariables: false,
         variables: {}
-      }
+      },
+      mapButtonClicked: false
     }
   }
 
   handleVariables = (variables) => {
-    // console.log(variables);
+    console.log(variables);
 
     this.setState({
       data: {
@@ -32,6 +33,13 @@ class App extends Component {
         userSelectedVariables: false,
         variables: {}
       }
+    })
+  }
+
+  handleMapButtonClick = () => {
+    console.log("I want a map!");
+    this.setState({
+      mapButtonClicked: true
     })
   }
 
@@ -66,7 +74,8 @@ class App extends Component {
               <div className="selectPoiContainer">
                 <div className="wrapper">
                   <SelectData
-                    getVariables={this.handleVariables} />
+                    getVariables={this.handleVariables}
+                    mapButtonClick={this.handleMapButtonClick} />
                 </div>
               </div>
             }

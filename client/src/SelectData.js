@@ -280,38 +280,31 @@ class SelectData extends Component {
                     const getData = this.handleApiCall('events', 'daily')
                     getData.then(res => res.json())
                         .then((data) => {
-                            // if the data coming back does not include a status code (the user has not exceded the rate limit)
-                            if (!data.code) {
-                                // console.log(data);
+                            // console.log(data);
 
-                                const graphData = {
-                                    graphType: "column",
-                                    graphTitle: "Total Events vs. Date",
-                                    axisXTitle: "Date",
-                                    axisYTitle: "Total Events",
-                                    showInLegend: false,
-                                    legendText: "",
-                                    data: data
-                                }
-
-                                // put the data in the right format for the graph
-                                graphData.data = data.map((item) => {
-                                    return { label: item.date.slice(0, 10), y: parseInt(item.events) }
-                                })
-                                // console.log(graphData);
-                                // this.props.getVariables(graphData)
-
-                                // graph analysis
-                                const analysis = "From this graph you can see the total number of ads being seen by customers/users each day (Assumption: An 'event' refers to a customer seeing an ad)."
-                                const graphDataPlusAnalysis = [graphData, analysis]
-                                // send the graph data up to App.js
-                                this.props.getVariables(graphDataPlusAnalysis)
-
-                            } else {
-                                // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
-                               
-                                alert(data.message)
+                            const graphData = {
+                                graphType: "column",
+                                graphTitle: "Total Events vs. Date",
+                                axisXTitle: "Date",
+                                axisYTitle: "Total Events",
+                                showInLegend: false,
+                                legendText: "",
+                                data: data
                             }
+
+                            // put the data in the right format for the graph
+                            graphData.data = data.map((item) => {
+                                return { label: item.date.slice(0, 10), y: parseInt(item.events) }
+                            })
+                            // console.log(graphData);
+                            // this.props.getVariables(graphData)
+
+                            // graph analysis
+                            const analysis = "From this graph you can see the total number of ads being seen by customers/users each day (Assumption: An 'event' refers to a customer seeing an ad)."
+                            const graphDataPlusAnalysis = [graphData, analysis]
+                            // send the graph data up to App.js
+                            this.props.getVariables(graphDataPlusAnalysis)
+
                         }).catch((error) => {
                             console.log(error);
                             // Api endpoint rate-limiting alert
@@ -324,9 +317,9 @@ class SelectData extends Component {
                     const getData = this.handleApiCall('events', 'hourly')
                     getData.then(res => res.json())
                         .then((data) => {
-                            // if the data coming back does not include a status code (the user has not exceded the rate limit)
+                            // the data coming back does not include a status code (the user has not exceded the rate limit)
                             if (!data.code) {
-                                // console.log(data);
+                                console.log(data);
                                 let countObj = {}
                                 // need the total events for each hour & the number of hour samples, store in countObj 
                                 data.forEach((item) => {
@@ -346,26 +339,45 @@ class SelectData extends Component {
                                     // console.log(countObj[`${item}`]);
                                     countObj[`${item}`]['averageEvents'] = parseInt(countObj[`${item}`].totalEvents / countObj[`${item}`].numberOfEvents)
                                 }
-                                // console.log(countObj);
+                                console.log(countObj);
                                 // format the data to send to App.js
                                 const graphData = {
-                                    graphType: "column",
+                                    graphType: "scatter",
                                     graphTitle: "Average Events vs. Hour",
                                     axisXTitle: "Hour (24hr clock)",
                                     axisYTitle: "Average Events",
-                                    showInLegend: false,
-                                    legendText: "",
-                                    data: []
+                                    showInLegend: true,
+                                    legendText: "y=1.36sin(1.02x-4.42)+7.29",
+                                    data: [],
+                                    curveFit: []
                                 }
-                                // console.log(graphData);
+                                console.log(graphData);
                                 // put the data in the right format for the graph
                                 const countArray = Object.entries(countObj)
-                                // console.log(countArray);
-
+                                console.log(countArray);
+                                const xData = [];
+                                const yData = [];
+                                function intToFloat(num, dec) {
+                                    return num.toFixed(dec)
+                                }
                                 graphData.data = countArray.map((item) => {
-                                    return { label: item[0], y: item[1].averageEvents }
+                                    console.log(item);
+                                    xData.push(parseFloat(item[0]))
+                                    yData.push(parseFloat(intToFloat(item[1].averageEvents,1)))
+                                    return { label: item[0], y: item[1].averageEvents, x: parseInt(item[0]) }
                                 })
-                                // console.log(graphData);
+                                console.log(xData);
+                                console.log(yData); 
+
+                                // regression
+                                graphData.curveFit = graphData.data.map((item, index) => {
+                                    console.log(item);
+                                    let x = item.x;
+                                    // let y = (-0.5326)*Math.sin(x) + 7.2717
+                                    let y = [8.59000791, 7.64336682, 6.35736483, 5.94990802, 6.80687771, 8.11668214, 8.63887317, 7.87891063, 6.55651581, 5.92406056, 6.5805106,  7.90417599, 8.64148158, 8.09416331, 6.78055806, 5.94471354, 6.37821494, 7.67051546, 8.59774401, 8.2817703,  7.02183671, 6.0111613,  6.20690257, 7.42368406]
+                                    // console.log(x,y);
+                                    return {"label":item.label, y:y[index]}
+                                })
                                 // graph analysis
                                 const analysis = "For each bar, on average this many ads are being seen by users at that point in the day (Assumption: An 'event' refers to a customer seeing an ad)."
                                 const graphDataPlusAnalysis = [graphData, analysis]
@@ -382,7 +394,9 @@ class SelectData extends Component {
                 }
             }
         } else {
-            this.props.getVariables(variables)
+            // ************ ISSUE HERE??? ***********
+            // this.props.getVariables(variables)
+
             // else if the user did not choose "events" as one of the variables, go into the Stats Graphs option:
 
             // 2. Stats Graphs (impressions, clicks, revenue)
@@ -398,13 +412,155 @@ class SelectData extends Component {
                     // impressions
                     if (variables.selector.average) {
                         if (variables.checkboxValues.includes("date")) {
+                            // console.log('MEeeeee');
+                            
                             // avg impressions vs day
-                            // this.handleApiCall('stats', 'hourly')
                             // total impressions vs day / 24 (num of days)
-                            this.handleApiCall('stats', 'daily')
+                            // this.handleApiCall('stats', 'daily')
+                            // NOT DONE YET*******
+
+                            const getData = this.handleApiCall('stats', 'daily')
+                            getData.then(res => res.json())
+                                .then((data) => {
+                                    // the data coming back does not include a status code (the user has not exceded the rate limit)
+                                    if (!data.code) {
+                                        console.log(data);
+                                        let countObj = {}
+                                        // need the total events for each hour & the number of hour samples, store in countObj 
+                                        data.forEach((item) => {
+                                            let hour = item.hour
+                                            if (!countObj[`${hour}`]) {
+                                                countObj[`${hour}`] = {
+                                                    totalImpressions: item.impressions,
+                                                    numberOfImpressions: 1
+                                                }
+                                            } else {
+                                                countObj[`${hour}`].totalImpressions = countObj[`${hour}`].totalImpressions + item.impressions
+                                                countObj[`${hour}`].numberOfImpressions++
+                                            }
+                                        })
+                                        console.log(countObj);
+                                        // get the average events for each hour
+                                        for (let item in countObj) {
+                                            // console.log(countObj[`${item}`]);
+                                            countObj[`${item}`]['averageImpressions'] = parseInt(countObj[`${item}`].totalImpressions / countObj[`${item}`].numberOfImpressions)
+                                        }
+                                        console.log(countObj);
+                                        // format the data to send to App.js
+                                        const graphData = {
+                                            graphType: "column",
+                                            graphTitle: "Average Impressions vs. Hour",
+                                            axisXTitle: "Hour (24hr clock)",
+                                            axisYTitle: "Average Impressions",
+                                            showInLegend: false,
+                                            legendText: "",
+                                            data: [],
+                                            curveFit: []
+                                        }
+                                        console.log(graphData);
+                                        // put the data in the right format for the graph
+                                        const countArray = Object.entries(countObj)
+                                        console.log(countArray);
+
+                                        graphData.data = countArray.map((item) => {
+                                            console.log(item);
+                                            return { label: item[0], y: item[1].averageImpressions, x: parseInt(item[0]) }
+                                        })
+                                        console.log(graphData);
+
+                                        // regression
+                                        // graphData.curveFit = graphData.data.map((item) => {
+                                        //     console.log(item);
+                                        //     let x = item.x;
+                                        //     let y = (-0.5326) * Math.sin(x) + 7.2717
+                                        //     console.log(x, y);
+                                        //     return { "label": item.label, y: y }
+                                        // })
+                                        // graph analysis
+                                        const analysis = "For each bar, on average this many ads are being displayed at that point in the day (Assumption: An 'impression' refers to the display of an ad)."
+                                        const graphDataPlusAnalysis = [graphData, analysis]
+                                        // send the graph data up to App.js
+                                        this.props.getVariables(graphDataPlusAnalysis)
+                                    } else {
+                                        // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                                        alert(data.message)
+                                    }
+                                }).catch((error) => {
+                                    // console.log(error);
+                                })
                         } else {
                             // avg impressions vs hour
-                            this.handleApiCall('stats', 'hourly')
+                            // this.handleApiCall('stats', 'hourly')
+
+                            const getData = this.handleApiCall('stats', 'hourly')
+                            getData.then(res => res.json())
+                                .then((data) => {
+                                    // the data coming back does not include a status code (the user has not exceded the rate limit)
+                                    if (!data.code) {
+                                        console.log(data);
+                                        let countObj = {}
+                                        // need the total events for each hour & the number of hour samples, store in countObj 
+                                        data.forEach((item) => {
+                                            let hour = item.hour
+                                            if (!countObj[`${hour}`]) {
+                                                countObj[`${hour}`] = {
+                                                    totalImpressions: item.impressions,
+                                                    numberOfImpressions: 1
+                                                }
+                                            } else {
+                                                countObj[`${hour}`].totalImpressions = countObj[`${hour}`].totalImpressions + item.impressions
+                                                countObj[`${hour}`].numberOfImpressions++
+                                            }    
+                                        })
+                                        console.log(countObj);
+                                        // get the average events for each hour
+                                        for (let item in countObj) {
+                                            // console.log(countObj[`${item}`]);
+                                            countObj[`${item}`]['averageImpressions'] = parseInt(countObj[`${item}`].totalImpressions / countObj[`${item}`].numberOfImpressions)
+                                        }
+                                        console.log(countObj);
+                                        // format the data to send to App.js
+                                        const graphData = {
+                                            graphType: "column",
+                                            graphTitle: "Average Impressions vs. Hour",
+                                            axisXTitle: "Hour (24hr clock)",
+                                            axisYTitle: "Average Impressions",
+                                            showInLegend: false,
+                                            legendText: "",
+                                            data: [],
+                                            curveFit: []
+                                        }
+                                        console.log(graphData);
+                                        // put the data in the right format for the graph
+                                        const countArray = Object.entries(countObj)
+                                        console.log(countArray);
+
+                                        graphData.data = countArray.map((item) => {
+                                            console.log(item);
+                                            return { label: item[0], y: item[1].averageImpressions, x: parseInt(item[0]) }
+                                        })
+                                        console.log(graphData);
+
+                                        // regression
+                                        // graphData.curveFit = graphData.data.map((item) => {
+                                        //     console.log(item);
+                                        //     let x = item.x;
+                                        //     let y = (-0.5326) * Math.sin(x) + 7.2717
+                                        //     console.log(x, y);
+                                        //     return { "label": item.label, y: y }
+                                        // })
+                                        // graph analysis
+                                        const analysis = "For each bar, on average this many ads are being displayed at that point in the day (Assumption: An 'impression' refers to the display of an ad)."
+                                        const graphDataPlusAnalysis = [graphData, analysis]
+                                        // send the graph data up to App.js
+                                        this.props.getVariables(graphDataPlusAnalysis)
+                                    } else {
+                                        // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                                        alert(data.message)
+                                    }
+                                }).catch((error) => {
+                                    // console.log(error);
+                                })
                         }
                     } else if (variables.selector.total) {
                         // total impressions vs day
@@ -423,9 +579,79 @@ class SelectData extends Component {
                         // this.handleApiCall('stats', 'hourly')
                         // total clicks vs day / 24 (num of days)
                         this.handleApiCall('stats', 'daily')
+
                     } else {
                         // avg clicks vs hour
-                        this.handleApiCall('stats', 'hourly')
+                        // this.handleApiCall('stats', 'hourly')
+                        const getData = this.handleApiCall('stats', 'hourly')
+                        getData.then(res => res.json())
+                            .then((data) => {
+                                // the data coming back does not include a status code (the user has not exceded the rate limit)
+                                if (!data.code) {
+                                    console.log(data);
+                                    let countObj = {}
+                                    // need the total events for each hour & the number of hour samples, store in countObj 
+                                    data.forEach((item) => {
+                                        let hour = item.hour
+                                        if (!countObj[`${hour}`]) {
+                                            countObj[`${hour}`] = {
+                                                totalClicks: item.clicks,
+                                                numberOfClicks: 1
+                                            }
+                                        } else {
+                                            countObj[`${hour}`].totalClicks = countObj[`${hour}`].totalClicks + item.clicks
+                                            countObj[`${hour}`].numberOfClicks++
+                                        }
+                                    })
+                                    console.log(countObj);
+                                    // get the average events for each hour
+                                    for (let item in countObj) {
+                                        // console.log(countObj[`${item}`]);
+                                        countObj[`${item}`]['averageClicks'] = parseInt(countObj[`${item}`].totalClicks / countObj[`${item}`].numberOfClicks)
+                                    }
+                                    console.log(countObj);
+                                    // format the data to send to App.js
+                                    const graphData = {
+                                        graphType: "column",
+                                        graphTitle: "Average Clicks vs. Hour",
+                                        axisXTitle: "Hour (24hr clock)",
+                                        axisYTitle: "Average Clicks",
+                                        showInLegend: false,
+                                        legendText: "",
+                                        data: [],
+                                        curveFit: []
+                                    }
+                                    console.log(graphData);
+                                    // put the data in the right format for the graph
+                                    const countArray = Object.entries(countObj)
+                                    console.log(countArray);
+
+                                    graphData.data = countArray.map((item) => {
+                                        console.log(item);
+                                        return { label: item[0], y: item[1].averageClicks, x: parseInt(item[0]) }
+                                    })
+                                    console.log(graphData);
+
+                                    // regression
+                                    // graphData.curveFit = graphData.data.map((item) => {
+                                    //     console.log(item);
+                                    //     let x = item.x;
+                                    //     let y = (-0.5326) * Math.sin(x) + 7.2717
+                                    //     console.log(x, y);
+                                    //     return { "label": item.label, y: y }
+                                    // })
+                                    // graph analysis
+                                    const analysis = "For each bar, on average this many ads are being clicked at that point in the day (Assumption: A 'click' refers to the clicking of an ad)."
+                                    const graphDataPlusAnalysis = [graphData, analysis]
+                                    // send the graph data up to App.js
+                                    this.props.getVariables(graphDataPlusAnalysis)
+                                } else {
+                                    // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                                    alert(data.message)
+                                }
+                            }).catch((error) => {
+                                // console.log(error);
+                            })
                     }
                 } else if (variables.selector.total) {
                     // total clicks vs day
@@ -450,7 +676,82 @@ class SelectData extends Component {
                             this.handleApiCall('stats', 'daily')
                         } else {
                             // avg revenue vs hour
-                            this.handleApiCall('stats', 'hourly')
+                            // this.handleApiCall('stats', 'hourly')
+
+                            const getData = this.handleApiCall('stats', 'hourly')
+                            getData.then(res => res.json())
+                                .then((data) => {
+                                    // the data coming back does not include a status code (the user has not exceded the rate limit)
+                                    if (!data.code) {
+                                        console.log(data);
+                                        let countObj = {}
+                                        // need the total events for each hour & the number of hour samples, store in countObj 
+                                        data.forEach((item) => {
+                                            const revenueNumber = parseInt(item.revenue);
+                                            // console.log(revenueNumber);
+                                            // user parseInt() to make sure that it is a number
+                                            
+                                            let hour = item.hour
+                                            if (!countObj[`${hour}`]) {
+                                                countObj[`${hour}`] = {
+                                                    totalRevenue: revenueNumber,
+                                                    numberOfRevenue: 1
+                                                }
+                                            } else {
+                                                countObj[`${hour}`].totalRevenue = countObj[`${hour}`].totalRevenue + revenueNumber
+                                                countObj[`${hour}`].numberOfRevenue++
+                                            }
+                                        })
+                                        console.log(countObj);
+                                        // get the average events for each hour
+                                        for (let item in countObj) {
+                                            console.log(countObj[`${item}`]);
+                                            countObj[`${item}`]['averageRevenue'] = parseInt(countObj[`${item}`].totalRevenue / countObj[`${item}`].numberOfRevenue)
+                                        }
+                                        console.log(countObj);
+                                        // format the data to send to App.js
+                                        const graphData = {
+                                            graphType: "column",
+                                            graphTitle: "Average Revenue vs. Hour",
+                                            axisXTitle: "Hour (24hr clock)",
+                                            axisYTitle: "Average Revenue",
+                                            showInLegend: false,
+                                            legendText: "",
+                                            data: [],
+                                            curveFit: []
+                                        }
+                                        console.log(graphData);
+                                        // put the data in the right format for the graph
+                                        const countArray = Object.entries(countObj)
+                                        console.log(countArray);
+
+                                        graphData.data = countArray.map((item) => {
+                                            console.log(item);
+                                            return { label: item[0], y: item[1].averageRevenue, x: parseInt(item[0]) }
+                                        })
+                                        console.log(graphData);
+
+                                        // regression
+                                        // graphData.curveFit = graphData.data.map((item) => {
+                                        //     console.log(item);
+                                        //     let x = item.x;
+                                        //     let y = (-0.5326) * Math.sin(x) + 7.2717
+                                        //     console.log(x, y);
+                                        //     return { "label": item.label, y: y }
+                                        // })
+                                        // graph analysis
+                                        const analysis = "For each bar, on average this much revenue from ads are made in the day."
+                                        const graphDataPlusAnalysis = [graphData, analysis]
+                                        // send the graph data up to App.js
+                                        this.props.getVariables(graphDataPlusAnalysis)
+                                    } else {
+                                        // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                                        alert(data.message)
+                                    }
+                                }).catch((error) => {
+                                    // console.log(error);
+                                })
+
                         }
                     } else if (variables.selector.total) {
                         // total revenue vs day
@@ -469,7 +770,7 @@ class SelectData extends Component {
     handleApiCall = (var1, var2, var3) => {
         // let data;
         if (var3) {
-            // console.log(`I am 3 variables`);
+            console.log(`I am 3 variables`);
             // i.e. /events/daily & /impressions/daily (both share var3)
 
             // const dataOne = fetch(`/${var1}/${var2}`, {
@@ -496,7 +797,7 @@ class SelectData extends Component {
             // })
 
         } else {
-            // console.log(`I am 2 variables`);
+            console.log(`I am 2 variables`);
 
             // const data = fetch(`/${var1}/${var2}`, {
             // })
@@ -509,6 +810,82 @@ class SelectData extends Component {
 
         }
     }
+
+    // getAverageData = (variable) => {
+    //     const getData = this.handleApiCall('stats', 'hourly')
+    //     getData.then(res => res.json())
+    //         .then((data) => {
+    //             // the data coming back does not include a status code (the user has not exceded the rate limit)
+    //             if (!data.code) {
+    //                 console.log(data);
+    //                 let countObj = {}
+    //                 // need the total events for each hour & the number of hour samples, store in countObj 
+    //                 data.forEach((item) => {
+    //                     let hour = item.hour
+    //                     if (!countObj[`${hour}`]) {
+    //                         countObj[`${hour}`] = {
+    //                             [`total${variable}`]: item[`${variable}`],
+    //                             [`numberOf${variable}`]: 1
+    //                         }
+    //                     } else {
+    //                         countObj[`${hour}`].totalImpressions = countObj[`${hour}`].totalImpressions + item.impressions
+    //                         countObj[`${hour}`].numberOfImpressions++
+    //                     }
+    //                 })
+    //                 console.log(countObj);
+    //                 // get the average events for each hour
+    //                 for (let item in countObj) {
+    //                     // console.log(countObj[`${item}`]);
+    //                     countObj[`${item}`]['averageImpressions'] = parseInt(countObj[`${item}`].totalImpressions / countObj[`${item}`].numberOfImpressions)
+    //                 }
+    //                 console.log(countObj);
+    //                 // format the data to send to App.js
+    //                 const graphData = {
+    //                     graphType: "column",
+    //                     graphTitle: "Average Impressions vs. Hour",
+    //                     axisXTitle: "Hour (24hr clock)",
+    //                     axisYTitle: "Average Impressions",
+    //                     showInLegend: false,
+    //                     legendText: "",
+    //                     data: [],
+    //                     curveFit: []
+    //                 }
+    //                 console.log(graphData);
+    //                 // put the data in the right format for the graph
+    //                 const countArray = Object.entries(countObj)
+    //                 console.log(countArray);
+
+    //                 graphData.data = countArray.map((item) => {
+    //                     console.log(item);
+    //                     return { label: item[0], y: item[1].averageImpressions, x: parseInt(item[0]) }
+    //                 })
+    //                 console.log(graphData);
+
+    //                 // regression
+    //                 // graphData.curveFit = graphData.data.map((item) => {
+    //                 //     console.log(item);
+    //                 //     let x = item.x;
+    //                 //     let y = (-0.5326) * Math.sin(x) + 7.2717
+    //                 //     console.log(x, y);
+    //                 //     return { "label": item.label, y: y }
+    //                 // })
+    //                 // graph analysis
+    //                 const analysis = "For each bar, on average this many ads are being displayed at that point in the day (Assumption: An 'impression' refers to the display of an ad)."
+    //                 const graphDataPlusAnalysis = [graphData, analysis]
+    //                 // send the graph data up to App.js
+    //                 this.props.getVariables(graphDataPlusAnalysis)
+    //             } else {
+    //                 // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+    //                 alert(data.message)
+    //             }
+    //         }).catch((error) => {
+    //             // console.log(error);
+    //         })
+    // }
+
+    // getTotalData = () => {
+
+    // }
 
     handleChange = (event) => {
         // if the selector checkbox value has the word Average in it
@@ -649,129 +1026,134 @@ class SelectData extends Component {
                 {this.state.poiSelected
                     /* if the user has selected a poi to see data for, render the variable options for the graph */
                     ?
-                    <form onSubmit={this.handleSubmit} className="selectVariablesForm">
-                        <h2>Select variables to compare</h2>
-
-                        <div className="variablesContainer">
-                            <div className="checkboxContainer">
-                                <label htmlFor="date">Date</label>
-                                <input type="checkbox" id="date" value="date" className="checkbox"></input>
+                    <div class="selectContainer">
+                        <form onSubmit={this.handleSubmit} className="selectVariablesForm">
+                            <h2>Select variables to compare</h2>
+    
+                            <div className="variablesContainer">
+                                <div className="checkboxContainer">
+                                    <label htmlFor="date">Date</label>
+                                    <input type="checkbox" id="date" value="date" className="checkbox"></input>
+                                </div>
+    
+                                <div className="checkboxContainer">
+                                    <label htmlFor="hour">Hour</label>
+                                    <input type="checkbox" id="hour" value="hour" className="checkbox"></input>
+                                </div>
+    
+                                {this.state.checkboxesSelected.events
+                                    ?
+                                    // render the Events checkbox + the sub-choices (average and total)
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="events">Events</label>
+                                        <input type="checkbox" id="events" value="events" className="checkbox" onChange={this.handleChange}></input>
+    
+                                        <div className="extraVariableSelectors">
+                                            <div className="extraVariable">
+                                                <label htmlFor="average">Normal</label>
+                                                <input type="radio" id="normal" value="eventsNormal" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
+                                            </div>
+    
+                                            <div className="extraVariable">
+                                                <label htmlFor="average">Average</label>
+                                                <input type="radio" id="average" value="eventsAverage" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
+                                            </div>
+    
+                                            <div className="extraVariable">
+                                                <label htmlFor="total">Total</label>
+                                                <input type="radio" id="total" value="eventsTotal" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    :
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="events">Events</label>
+                                        <input type="checkbox" id="events" value="events" className="checkbox" onChange={this.handleChange}></input>
+                                    </div>
+                                }
+    
+                                {this.state.checkboxesSelected.impressions
+                                    ?
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="impression">Impressions</label>
+                                        <input type="checkbox" id="impressions" value="impressions" className="checkbox" onChange={this.handleChange}></input>
+    
+                                        <div className="extraVariableSelectors">
+                                            <div className="extraVariable">
+                                                <label htmlFor="average">Average</label>
+                                                <input type="radio" id="average" value="impressionsAverage" className="selectorRadio" name="avgOrTotalTwo" onChange={this.handleChange}></input>
+                                            </div>
+    
+                                            <div className="extraVariable">
+                                                <label htmlFor="total">Total</label>
+                                                <input type="radio" id="total" value="impressionsTotal" className="selectorRadio" name="avgOrTotalTwo" onChange={this.handleChange}></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    :
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="impression">Impressions</label>
+                                        <input type="checkbox" id="impressions" value="impressions" className="checkbox" onChange={this.handleChange}></input>
+                                    </div>
+                                }
+    
+                                {this.state.checkboxesSelected.clicks
+                                    ?
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="clicks">Clicks</label>
+                                        <input type="checkbox" id="clicks" value="clicks" className="checkbox" onChange={this.handleChange}></input>
+    
+                                        <div className="extraVariableSelectors">
+                                            <div className="extraVariable">
+                                                <label htmlFor="average">Average</label>
+                                                <input type="radio" id="average" value="clicksAverage" className="selectorRadio" name="avgOrTotalThree" onChange={this.handleChange}></input>
+                                            </div>
+    
+                                            <div className="extraVariable">
+                                                <label htmlFor="total">Total</label>
+                                                <input type="radio" id="total" value="clicksTotal" className="selectorRadio" name="avgOrTotalThree" onChange={this.handleChange}></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    :
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="clicks">Clicks</label>
+                                        <input type="checkbox" id="clicks" value="clicks" className="checkbox" onChange={this.handleChange}></input>
+                                    </div>
+                                }
+    
+                                {this.state.checkboxesSelected.revenue
+                                    ?
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="revenue">Revenue</label>
+                                        <input type="checkbox" id="revenue" value="revenue" className="checkbox" onChange={this.handleChange}></input>
+    
+                                        <div className="extraVariableSelectors">
+                                            <div className="extraVariable">
+                                                <label htmlFor="average">Average</label>
+                                                <input type="radio" id="average" value="revenueAverage" className="selectorRadio" name="avgOrTotalFour" onChange={this.handleChange}></input>
+                                            </div>
+    
+                                            <div className="extraVariable">
+                                                <label htmlFor="total">Total</label>
+                                                <input type="radio" id="total" value="revenueTotal" className="selectorRadio" name="avgOrTotalFour" onChange={this.handleChange}></input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    :
+                                    <div className="checkboxContainer">
+                                        <label htmlFor="revenue">Revenue</label>
+                                        <input type="checkbox" id="revenue" value="revenue" className="checkbox" onChange={this.handleChange}></input>
+                                    </div>
+                                }
                             </div>
-
-                            <div className="checkboxContainer">
-                                <label htmlFor="hour">Hour</label>
-                                <input type="checkbox" id="hour" value="hour" className="checkbox"></input>
-                            </div>
-
-                            {this.state.checkboxesSelected.events
-                                ?
-                                // render the Events checkbox + the sub-choices (average and total)
-                                <div className="checkboxContainer">
-                                    <label htmlFor="events">Events</label>
-                                    <input type="checkbox" id="events" value="events" className="checkbox" onChange={this.handleChange}></input>
-
-                                    <div className="extraVariableSelectors">
-                                        <div className="extraVariable">
-                                            <label htmlFor="average">Normal</label>
-                                            <input type="radio" id="normal" value="eventsNormal" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
-                                        </div>
-
-                                        <div className="extraVariable">
-                                            <label htmlFor="average">Average</label>
-                                            <input type="radio" id="average" value="eventsAverage" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
-                                        </div>
-
-                                        <div className="extraVariable">
-                                            <label htmlFor="total">Total</label>
-                                            <input type="radio" id="total" value="eventsTotal" className="selectorRadio" name="avgOrTotalOne" onChange={this.handleChange}></input>
-                                        </div>
-                                    </div>
-                                </div>
-                                :
-                                <div className="checkboxContainer">
-                                    <label htmlFor="events">Events</label>
-                                    <input type="checkbox" id="events" value="events" className="checkbox" onChange={this.handleChange}></input>
-                                </div>
-                            }
-
-                            {this.state.checkboxesSelected.impressions
-                                ?
-                                <div className="checkboxContainer">
-                                    <label htmlFor="impression">Impressions</label>
-                                    <input type="checkbox" id="impressions" value="impressions" className="checkbox" onChange={this.handleChange}></input>
-
-                                    <div className="extraVariableSelectors">
-                                        <div className="extraVariable">
-                                            <label htmlFor="average">Average</label>
-                                            <input type="radio" id="average" value="impressionsAverage" className="selectorRadio" name="avgOrTotalTwo" onChange={this.handleChange}></input>
-                                        </div>
-
-                                        <div className="extraVariable">
-                                            <label htmlFor="total">Total</label>
-                                            <input type="radio" id="total" value="impressionsTotal" className="selectorRadio" name="avgOrTotalTwo" onChange={this.handleChange}></input>
-                                        </div>
-                                    </div>
-                                </div>
-                                :
-                                <div className="checkboxContainer">
-                                    <label htmlFor="impression">Impressions</label>
-                                    <input type="checkbox" id="impressions" value="impressions" className="checkbox" onChange={this.handleChange}></input>
-                                </div>
-                            }
-
-                            {this.state.checkboxesSelected.clicks
-                                ?
-                                <div className="checkboxContainer">
-                                    <label htmlFor="clicks">Clicks</label>
-                                    <input type="checkbox" id="clicks" value="clicks" className="checkbox" onChange={this.handleChange}></input>
-
-                                    <div className="extraVariableSelectors">
-                                        <div className="extraVariable">
-                                            <label htmlFor="average">Average</label>
-                                            <input type="radio" id="average" value="clicksAverage" className="selectorRadio" name="avgOrTotalThree" onChange={this.handleChange}></input>
-                                        </div>
-
-                                        <div className="extraVariable">
-                                            <label htmlFor="total">Total</label>
-                                            <input type="radio" id="total" value="clicksTotal" className="selectorRadio" name="avgOrTotalThree" onChange={this.handleChange}></input>
-                                        </div>
-                                    </div>
-                                </div>
-                                :
-                                <div className="checkboxContainer">
-                                    <label htmlFor="clicks">Clicks</label>
-                                    <input type="checkbox" id="clicks" value="clicks" className="checkbox" onChange={this.handleChange}></input>
-                                </div>
-                            }
-
-                            {this.state.checkboxesSelected.revenue
-                                ?
-                                <div className="checkboxContainer">
-                                    <label htmlFor="revenue">Revenue</label>
-                                    <input type="checkbox" id="revenue" value="revenue" className="checkbox" onChange={this.handleChange}></input>
-
-                                    <div className="extraVariableSelectors">
-                                        <div className="extraVariable">
-                                            <label htmlFor="average">Average</label>
-                                            <input type="radio" id="average" value="revenueAverage" className="selectorRadio" name="avgOrTotalFour" onChange={this.handleChange}></input>
-                                        </div>
-
-                                        <div className="extraVariable">
-                                            <label htmlFor="total">Total</label>
-                                            <input type="radio" id="total" value="revenueTotal" className="selectorRadio" name="avgOrTotalFour" onChange={this.handleChange}></input>
-                                        </div>
-                                    </div>
-                                </div>
-                                :
-                                <div className="checkboxContainer">
-                                    <label htmlFor="revenue">Revenue</label>
-                                    <input type="checkbox" id="revenue" value="revenue" className="checkbox" onChange={this.handleChange}></input>
-                                </div>
-                            }
-                        </div>
-
-                        <button>Create Graph</button>
-                    </form>
+    
+                            <button>Create Graph</button>
+                        </form>
+                            {/* <div class="buttonContainer">
+                                <button onClick={this.props.mapButtonClick}>Map</button>
+                            </div> */}
+                    </div>
                     :
                     // if the user has not selected a poi, show the poi slector input
                     <form className="selectPOIForm">
