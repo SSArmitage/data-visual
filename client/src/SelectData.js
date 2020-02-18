@@ -5,6 +5,7 @@ class SelectData extends Component {
         super();
         this.state = {
             poiSelected: false,
+            poi: "",
             checkboxesSelected: {},
             selectedVariables: [],
             selector: {
@@ -15,54 +16,43 @@ class SelectData extends Component {
     }
 
     componentDidMount = () => {
-        // grab the data from the diff end points
-        // fetch('/events/daily', {
-        //     // accept: "application/json"
-        // })
-        // .then(res => res.json())
-        // .then((data) => {
-        //     console.log(data);
-        // })
-
-        // fetch('/events/hourly', {
-        //     // accept: "application/json"
-        // })
-        // .then(res => res.json())
-        // .then((data) => {
-        //     console.log(data);
-        // })
-
-        // fetch('/stats/daily', {
-        //     // accept: "application/json"
-        // })
-        // .then(res => res.json())
-        // .then((data) => {
-        //     console.log(data);
-        // })
-
-        // fetch('/stats/hourly', {
-        //     // accept: "application/json"
-        // })
-        // .then(res => res.json())
-        // .then((data) => {
-        //     console.log(data);
-        // })
-
-        // // POI 
-        // fetch('/poi', {
-        //     // accept: "application/json"
-        // })
-        // .then(res => res.json())
-        // .then((data) => {
-        //     console.log(data);
-        // })
+        fetch('/poi').then(res => res.json())
+        .then((data) => {
+            // the data coming back does not include a status code (the user has not exceded the rate limit)
+            if (!data.code) {
+                this.setState({
+                    poi: data
+                })
+            } else {
+                // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                alert(data.message)
+            }
+            
+        })
     }
 
     handlePoiChange = (event) => {
         alert("The only graphs that are currently displaying: Total Events vs Date & Average Events vs. Hour")
-        this.setState({
-            poiSelected: true
+        const newPOI = [...this.state.poi]
+        const optionsNodeList = document.getElementsByClassName('poiChoices')
+        const options = Array.from(optionsNodeList)
+        // grab the selected option input
+        let selectedOption = ""
+        options.forEach(item => {
+            if (item.selected) {
+                selectedOption = item.text
+            }
         })
+        const poiSelected = newPOI.filter((item) => {
+            return item.name === selectedOption
+        })
+        
+        this.setState({
+            poiSelected: true,
+            poi: poiSelected
+        })
+
+        this.props.passPOI(poiSelected)
     }
 
     handleSubmit = (event) => {
@@ -122,18 +112,14 @@ class SelectData extends Component {
                 // if user did not select just date and hour => they selected an appropriate combination of checkboxes
                 if (this.state.selector.normal) {
                     // user selected "normal"
-                    // console.log(`I selected normal`);
                     if (checkboxValues.includes("date") && checkboxValues.includes("hour")) {
                         // user selected date + hour => correct combo
-                        // console.log(`I chose correct`);
                         let data = {};
                         data.checkboxValues = checkboxValues;
                         data.selector = this.state.selector;
-                        // console.log(data);
                         // send the data to the handleData() fxn 
                         this.handleData(data)
                     } else {
-                        // console.log(`I chose incorrect`);
                         // user did not select date + hour => incorrect combo
                         alert("Events-Normal can only be combined with date + hour, please select again.")
                     }
@@ -151,11 +137,9 @@ class SelectData extends Component {
                         }
                     })
                 } else {
-                    // console.log(`I did not select normal`);
                     // user did not select "normal"
                     // check that if events, impressions, clicks, or revenue were chosen, that they have also chosen a selector average or total
                     if (this.state.selector.average || this.state.selector.total) {
-                        // console.log(`I selected avg or total`);
                         // the user either selected average or total
 
                         // if the user selected date + events-average
@@ -163,13 +147,11 @@ class SelectData extends Component {
                             alert("You cannot use Date + Hours + Events-Average, or Date + Events-Average for graphical comparison, please select again.")
                             // the user did not select date + events-average
                         } else {
-                            // console.log(`I did not choose  date + evnt`);
                             let data = {};
                             data.checkboxValues = checkboxValues;
                             data.selector = this.state.selector;
 
                             // send the data to the handleData() fxn 
-                            // console.log(data);
                             this.handleData(data)
                         }
 
@@ -228,24 +210,20 @@ class SelectData extends Component {
 
                     if (variables.selector.total) {
                         // total events vs total impressions, for each day
-                        // console.log(`total impressions`);
                         this.handleApiCall('events', 'daily', 'stats')
 
                     } else if (variables.selector.average) {
                         // avg events vs avg impressions, for each hour
-                        // console.log(`average impressions`);
                         this.handleApiCall('events', 'hourly', 'stats')
                     }
                 } else if (variables.checkboxValues.includes("clicks")) {
 
                     if (variables.selector.total) {
                         // total clicks vs total events, for each day
-                        // console.log(`total clicks`);
                         this.handleApiCall('events', 'daily', 'stats')
 
                     } else if (variables.selector.average) {
                         // avg clicks vs avg events, for each hour
-                        // console.log(`average clicks`);
                         this.handleApiCall('events', 'hourly', 'stats')
                     }
 
@@ -253,12 +231,10 @@ class SelectData extends Component {
 
                     if (variables.selector.total) {
                         // total revenue vs total events, for each day
-                        // console.log(`total revenue`);
                         this.handleApiCall('events', 'daily', 'stats')
 
                     } else if (variables.selector.average) {
                         // avg revenue vs avg events, for each hour
-                        // console.log(`average revenue`);
                         this.handleApiCall('events', 'hourly', 'stats')
                     }
                 }
@@ -268,9 +244,6 @@ class SelectData extends Component {
 
                 // 1. Event Graphs
                 if (variables.checkboxValues.includes("date") && variables.checkboxValues.includes("hour")) {
-                    // grab the data from the api (request from the /events/hourly endpoint)
-                    // can store the results from the api call and manipulate data here
-                    // THEN call a fxn to pass this data to app -> DisplayData
                     // date vs events per hour
                     // # of events over the course of a day, for each day
                     this.handleApiCall('events', 'hourly')
@@ -280,33 +253,34 @@ class SelectData extends Component {
                     const getData = this.handleApiCall('events', 'daily')
                     getData.then(res => res.json())
                         .then((data) => {
-                            // console.log(data);
+                            // the data coming back does not include a status code (the user has not exceded the rate limit)
+                            if (!data.code) {
+                                const graphData = {
+                                    graphType: "column",
+                                    graphTitle: "Total Events vs. Date",
+                                    axisXTitle: "Date",
+                                    axisYTitle: "Total Events",
+                                    showInLegend: false,
+                                    legendText: "",
+                                    data: data
+                                }
 
-                            const graphData = {
-                                graphType: "column",
-                                graphTitle: "Total Events vs. Date",
-                                axisXTitle: "Date",
-                                axisYTitle: "Total Events",
-                                showInLegend: false,
-                                legendText: "",
-                                data: data
+                                // put the data in the right format for the graph
+                                graphData.data = data.map((item) => {
+                                    return { label: item.date.slice(0, 10), y: parseInt(item.events) }
+                                })
+                                // this.props.getVariables(graphData)
+
+                                // graph analysis
+                                const analysis = "Each bar indicates the total number of ads seen by users each day (assumption: an 'event' refers to a customer seeing an ad)."
+                                const graphDataPlusAnalysis = [graphData, analysis]
+                                // send the graph data up to App.js
+                                this.props.getVariables(graphDataPlusAnalysis)
+                            } else {
+                                // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
+                                alert(data.message)
                             }
-
-                            // put the data in the right format for the graph
-                            graphData.data = data.map((item) => {
-                                return { label: item.date.slice(0, 10), y: parseInt(item.events) }
-                            })
-                            // console.log(graphData);
-                            // this.props.getVariables(graphData)
-
-                            // graph analysis
-                            const analysis = "From this graph you can see the total number of ads being seen by customers/users each day (Assumption: An 'event' refers to a customer seeing an ad)."
-                            const graphDataPlusAnalysis = [graphData, analysis]
-                            // send the graph data up to App.js
-                            this.props.getVariables(graphDataPlusAnalysis)
-
                         }).catch((error) => {
-                            console.log(error);
                             // Api endpoint rate-limiting alert
                             // if (res.status === 429)
                         })
@@ -319,7 +293,6 @@ class SelectData extends Component {
                         .then((data) => {
                             // the data coming back does not include a status code (the user has not exceded the rate limit)
                             if (!data.code) {
-                                console.log(data);
                                 let countObj = {}
                                 // need the total events for each hour & the number of hour samples, store in countObj 
                                 data.forEach((item) => {
@@ -336,10 +309,8 @@ class SelectData extends Component {
                                 })
                                 // get the average events for each hour
                                 for (let item in countObj) {
-                                    // console.log(countObj[`${item}`]);
                                     countObj[`${item}`]['averageEvents'] = parseInt(countObj[`${item}`].totalEvents / countObj[`${item}`].numberOfEvents)
                                 }
-                                console.log(countObj);
                                 // format the data to send to App.js
                                 const graphData = {
                                     graphType: "scatter",
@@ -351,35 +322,28 @@ class SelectData extends Component {
                                     data: [],
                                     curveFit: []
                                 }
-                                console.log(graphData);
                                 // put the data in the right format for the graph
                                 const countArray = Object.entries(countObj)
-                                console.log(countArray);
                                 const xData = [];
                                 const yData = [];
                                 function intToFloat(num, dec) {
                                     return num.toFixed(dec)
                                 }
                                 graphData.data = countArray.map((item) => {
-                                    console.log(item);
                                     xData.push(parseFloat(item[0]))
                                     yData.push(parseFloat(intToFloat(item[1].averageEvents,1)))
                                     return { label: item[0], y: item[1].averageEvents, x: parseInt(item[0]) }
-                                })
-                                console.log(xData);
-                                console.log(yData); 
+                                }) 
 
-                                // regression
+                                // curve fit
                                 graphData.curveFit = graphData.data.map((item, index) => {
-                                    console.log(item);
                                     let x = item.x;
                                     // let y = (-0.5326)*Math.sin(x) + 7.2717
                                     let y = [8.59000791, 7.64336682, 6.35736483, 5.94990802, 6.80687771, 8.11668214, 8.63887317, 7.87891063, 6.55651581, 5.92406056, 6.5805106,  7.90417599, 8.64148158, 8.09416331, 6.78055806, 5.94471354, 6.37821494, 7.67051546, 8.59774401, 8.2817703,  7.02183671, 6.0111613,  6.20690257, 7.42368406]
-                                    // console.log(x,y);
                                     return {"label":item.label, y:y[index]}
                                 })
                                 // graph analysis
-                                const analysis = "For each bar, on average this many ads are being seen by users at that point in the day (Assumption: An 'event' refers to a customer seeing an ad)."
+                                const analysis = "Each blue dot indicates the average number of ads seen by users at the associated hour (assumption: an 'event' refers to a customer seeing an ad). The data behaviour is modeled by an approximation curve (red). From this curve you can approximately predict how events will behave hourly."
                                 const graphDataPlusAnalysis = [graphData, analysis]
                                 // send the graph data up to App.js
                                 this.props.getVariables(graphDataPlusAnalysis)
@@ -388,15 +352,10 @@ class SelectData extends Component {
                                 alert(data.message)
                             }
                         }).catch((error) => {
-                            // console.log(error);
                         })
-
                 }
             }
         } else {
-            // ************ ISSUE HERE??? ***********
-            // this.props.getVariables(variables)
-
             // else if the user did not choose "events" as one of the variables, go into the Stats Graphs option:
 
             // 2. Stats Graphs (impressions, clicks, revenue)
@@ -412,155 +371,11 @@ class SelectData extends Component {
                     // impressions
                     if (variables.selector.average) {
                         if (variables.checkboxValues.includes("date")) {
-                            // console.log('MEeeeee');
-                            
                             // avg impressions vs day
-                            // total impressions vs day / 24 (num of days)
                             // this.handleApiCall('stats', 'daily')
-                            // NOT DONE YET*******
-
-                            const getData = this.handleApiCall('stats', 'daily')
-                            getData.then(res => res.json())
-                                .then((data) => {
-                                    // the data coming back does not include a status code (the user has not exceded the rate limit)
-                                    if (!data.code) {
-                                        console.log(data);
-                                        let countObj = {}
-                                        // need the total events for each hour & the number of hour samples, store in countObj 
-                                        data.forEach((item) => {
-                                            let hour = item.hour
-                                            if (!countObj[`${hour}`]) {
-                                                countObj[`${hour}`] = {
-                                                    totalImpressions: item.impressions,
-                                                    numberOfImpressions: 1
-                                                }
-                                            } else {
-                                                countObj[`${hour}`].totalImpressions = countObj[`${hour}`].totalImpressions + item.impressions
-                                                countObj[`${hour}`].numberOfImpressions++
-                                            }
-                                        })
-                                        console.log(countObj);
-                                        // get the average events for each hour
-                                        for (let item in countObj) {
-                                            // console.log(countObj[`${item}`]);
-                                            countObj[`${item}`]['averageImpressions'] = parseInt(countObj[`${item}`].totalImpressions / countObj[`${item}`].numberOfImpressions)
-                                        }
-                                        console.log(countObj);
-                                        // format the data to send to App.js
-                                        const graphData = {
-                                            graphType: "column",
-                                            graphTitle: "Average Impressions vs. Hour",
-                                            axisXTitle: "Hour (24hr clock)",
-                                            axisYTitle: "Average Impressions",
-                                            showInLegend: false,
-                                            legendText: "",
-                                            data: [],
-                                            curveFit: []
-                                        }
-                                        console.log(graphData);
-                                        // put the data in the right format for the graph
-                                        const countArray = Object.entries(countObj)
-                                        console.log(countArray);
-
-                                        graphData.data = countArray.map((item) => {
-                                            console.log(item);
-                                            return { label: item[0], y: item[1].averageImpressions, x: parseInt(item[0]) }
-                                        })
-                                        console.log(graphData);
-
-                                        // regression
-                                        // graphData.curveFit = graphData.data.map((item) => {
-                                        //     console.log(item);
-                                        //     let x = item.x;
-                                        //     let y = (-0.5326) * Math.sin(x) + 7.2717
-                                        //     console.log(x, y);
-                                        //     return { "label": item.label, y: y }
-                                        // })
-                                        // graph analysis
-                                        const analysis = "For each bar, on average this many ads are being displayed at that point in the day (Assumption: An 'impression' refers to the display of an ad)."
-                                        const graphDataPlusAnalysis = [graphData, analysis]
-                                        // send the graph data up to App.js
-                                        this.props.getVariables(graphDataPlusAnalysis)
-                                    } else {
-                                        // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
-                                        alert(data.message)
-                                    }
-                                }).catch((error) => {
-                                    // console.log(error);
-                                })
                         } else {
                             // avg impressions vs hour
                             // this.handleApiCall('stats', 'hourly')
-
-                            const getData = this.handleApiCall('stats', 'hourly')
-                            getData.then(res => res.json())
-                                .then((data) => {
-                                    // the data coming back does not include a status code (the user has not exceded the rate limit)
-                                    if (!data.code) {
-                                        console.log(data);
-                                        let countObj = {}
-                                        // need the total events for each hour & the number of hour samples, store in countObj 
-                                        data.forEach((item) => {
-                                            let hour = item.hour
-                                            if (!countObj[`${hour}`]) {
-                                                countObj[`${hour}`] = {
-                                                    totalImpressions: item.impressions,
-                                                    numberOfImpressions: 1
-                                                }
-                                            } else {
-                                                countObj[`${hour}`].totalImpressions = countObj[`${hour}`].totalImpressions + item.impressions
-                                                countObj[`${hour}`].numberOfImpressions++
-                                            }    
-                                        })
-                                        console.log(countObj);
-                                        // get the average events for each hour
-                                        for (let item in countObj) {
-                                            // console.log(countObj[`${item}`]);
-                                            countObj[`${item}`]['averageImpressions'] = parseInt(countObj[`${item}`].totalImpressions / countObj[`${item}`].numberOfImpressions)
-                                        }
-                                        console.log(countObj);
-                                        // format the data to send to App.js
-                                        const graphData = {
-                                            graphType: "column",
-                                            graphTitle: "Average Impressions vs. Hour",
-                                            axisXTitle: "Hour (24hr clock)",
-                                            axisYTitle: "Average Impressions",
-                                            showInLegend: false,
-                                            legendText: "",
-                                            data: [],
-                                            curveFit: []
-                                        }
-                                        console.log(graphData);
-                                        // put the data in the right format for the graph
-                                        const countArray = Object.entries(countObj)
-                                        console.log(countArray);
-
-                                        graphData.data = countArray.map((item) => {
-                                            console.log(item);
-                                            return { label: item[0], y: item[1].averageImpressions, x: parseInt(item[0]) }
-                                        })
-                                        console.log(graphData);
-
-                                        // regression
-                                        // graphData.curveFit = graphData.data.map((item) => {
-                                        //     console.log(item);
-                                        //     let x = item.x;
-                                        //     let y = (-0.5326) * Math.sin(x) + 7.2717
-                                        //     console.log(x, y);
-                                        //     return { "label": item.label, y: y }
-                                        // })
-                                        // graph analysis
-                                        const analysis = "For each bar, on average this many ads are being displayed at that point in the day (Assumption: An 'impression' refers to the display of an ad)."
-                                        const graphDataPlusAnalysis = [graphData, analysis]
-                                        // send the graph data up to App.js
-                                        this.props.getVariables(graphDataPlusAnalysis)
-                                    } else {
-                                        // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
-                                        alert(data.message)
-                                    }
-                                }).catch((error) => {
-                                    // console.log(error);
-                                })
                         }
                     } else if (variables.selector.total) {
                         // total impressions vs day
@@ -583,75 +398,6 @@ class SelectData extends Component {
                     } else {
                         // avg clicks vs hour
                         // this.handleApiCall('stats', 'hourly')
-                        const getData = this.handleApiCall('stats', 'hourly')
-                        getData.then(res => res.json())
-                            .then((data) => {
-                                // the data coming back does not include a status code (the user has not exceded the rate limit)
-                                if (!data.code) {
-                                    console.log(data);
-                                    let countObj = {}
-                                    // need the total events for each hour & the number of hour samples, store in countObj 
-                                    data.forEach((item) => {
-                                        let hour = item.hour
-                                        if (!countObj[`${hour}`]) {
-                                            countObj[`${hour}`] = {
-                                                totalClicks: item.clicks,
-                                                numberOfClicks: 1
-                                            }
-                                        } else {
-                                            countObj[`${hour}`].totalClicks = countObj[`${hour}`].totalClicks + item.clicks
-                                            countObj[`${hour}`].numberOfClicks++
-                                        }
-                                    })
-                                    console.log(countObj);
-                                    // get the average events for each hour
-                                    for (let item in countObj) {
-                                        // console.log(countObj[`${item}`]);
-                                        countObj[`${item}`]['averageClicks'] = parseInt(countObj[`${item}`].totalClicks / countObj[`${item}`].numberOfClicks)
-                                    }
-                                    console.log(countObj);
-                                    // format the data to send to App.js
-                                    const graphData = {
-                                        graphType: "column",
-                                        graphTitle: "Average Clicks vs. Hour",
-                                        axisXTitle: "Hour (24hr clock)",
-                                        axisYTitle: "Average Clicks",
-                                        showInLegend: false,
-                                        legendText: "",
-                                        data: [],
-                                        curveFit: []
-                                    }
-                                    console.log(graphData);
-                                    // put the data in the right format for the graph
-                                    const countArray = Object.entries(countObj)
-                                    console.log(countArray);
-
-                                    graphData.data = countArray.map((item) => {
-                                        console.log(item);
-                                        return { label: item[0], y: item[1].averageClicks, x: parseInt(item[0]) }
-                                    })
-                                    console.log(graphData);
-
-                                    // regression
-                                    // graphData.curveFit = graphData.data.map((item) => {
-                                    //     console.log(item);
-                                    //     let x = item.x;
-                                    //     let y = (-0.5326) * Math.sin(x) + 7.2717
-                                    //     console.log(x, y);
-                                    //     return { "label": item.label, y: y }
-                                    // })
-                                    // graph analysis
-                                    const analysis = "For each bar, on average this many ads are being clicked at that point in the day (Assumption: A 'click' refers to the clicking of an ad)."
-                                    const graphDataPlusAnalysis = [graphData, analysis]
-                                    // send the graph data up to App.js
-                                    this.props.getVariables(graphDataPlusAnalysis)
-                                } else {
-                                    // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
-                                    alert(data.message)
-                                }
-                            }).catch((error) => {
-                                // console.log(error);
-                            })
                     }
                 } else if (variables.selector.total) {
                     // total clicks vs day
@@ -677,81 +423,6 @@ class SelectData extends Component {
                         } else {
                             // avg revenue vs hour
                             // this.handleApiCall('stats', 'hourly')
-
-                            const getData = this.handleApiCall('stats', 'hourly')
-                            getData.then(res => res.json())
-                                .then((data) => {
-                                    // the data coming back does not include a status code (the user has not exceded the rate limit)
-                                    if (!data.code) {
-                                        console.log(data);
-                                        let countObj = {}
-                                        // need the total events for each hour & the number of hour samples, store in countObj 
-                                        data.forEach((item) => {
-                                            const revenueNumber = parseInt(item.revenue);
-                                            // console.log(revenueNumber);
-                                            // user parseInt() to make sure that it is a number
-                                            
-                                            let hour = item.hour
-                                            if (!countObj[`${hour}`]) {
-                                                countObj[`${hour}`] = {
-                                                    totalRevenue: revenueNumber,
-                                                    numberOfRevenue: 1
-                                                }
-                                            } else {
-                                                countObj[`${hour}`].totalRevenue = countObj[`${hour}`].totalRevenue + revenueNumber
-                                                countObj[`${hour}`].numberOfRevenue++
-                                            }
-                                        })
-                                        console.log(countObj);
-                                        // get the average events for each hour
-                                        for (let item in countObj) {
-                                            console.log(countObj[`${item}`]);
-                                            countObj[`${item}`]['averageRevenue'] = parseInt(countObj[`${item}`].totalRevenue / countObj[`${item}`].numberOfRevenue)
-                                        }
-                                        console.log(countObj);
-                                        // format the data to send to App.js
-                                        const graphData = {
-                                            graphType: "column",
-                                            graphTitle: "Average Revenue vs. Hour",
-                                            axisXTitle: "Hour (24hr clock)",
-                                            axisYTitle: "Average Revenue",
-                                            showInLegend: false,
-                                            legendText: "",
-                                            data: [],
-                                            curveFit: []
-                                        }
-                                        console.log(graphData);
-                                        // put the data in the right format for the graph
-                                        const countArray = Object.entries(countObj)
-                                        console.log(countArray);
-
-                                        graphData.data = countArray.map((item) => {
-                                            console.log(item);
-                                            return { label: item[0], y: item[1].averageRevenue, x: parseInt(item[0]) }
-                                        })
-                                        console.log(graphData);
-
-                                        // regression
-                                        // graphData.curveFit = graphData.data.map((item) => {
-                                        //     console.log(item);
-                                        //     let x = item.x;
-                                        //     let y = (-0.5326) * Math.sin(x) + 7.2717
-                                        //     console.log(x, y);
-                                        //     return { "label": item.label, y: y }
-                                        // })
-                                        // graph analysis
-                                        const analysis = "For each bar, on average this much revenue from ads are made in the day."
-                                        const graphDataPlusAnalysis = [graphData, analysis]
-                                        // send the graph data up to App.js
-                                        this.props.getVariables(graphDataPlusAnalysis)
-                                    } else {
-                                        // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
-                                        alert(data.message)
-                                    }
-                                }).catch((error) => {
-                                    // console.log(error);
-                                })
-
                         }
                     } else if (variables.selector.total) {
                         // total revenue vs day
@@ -768,128 +439,25 @@ class SelectData extends Component {
     }
 
     handleApiCall = (var1, var2, var3) => {
-        // let data;
         if (var3) {
-            console.log(`I am 3 variables`);
             // i.e. /events/daily & /impressions/daily (both share var3)
-
-            // const dataOne = fetch(`/${var1}/${var2}`, {
-            // })
-            // .then(res => res.json())
-            // .then((data) => {
-            //     console.log(data);
-            // })
-
-            // const dataTwo = fetch(`/${var3}/${var2}`, {
-            // })
-            // .then(res => res.json())
-            // .then((data) => {
-            //     console.log(data);
-            // })
-
             return Promise.all([
                 fetch(`/${var1}/${var2}`),
                 fetch(`/${var3}/${var2}`)
             ])
-            // .then(res => res.json())
-            // .then((data) => {
-            //     console.log(data);
-            // })
-
         } else {
-            console.log(`I am 2 variables`);
-
-            // const data = fetch(`/${var1}/${var2}`, {
-            // })
-            // .then(res => res.json())
-            // .then((data) => {
-            //     console.log(data);
-            // })
-
             return fetch(`/${var1}/${var2}`)
-
         }
     }
 
-    // getAverageData = (variable) => {
-    //     const getData = this.handleApiCall('stats', 'hourly')
-    //     getData.then(res => res.json())
-    //         .then((data) => {
-    //             // the data coming back does not include a status code (the user has not exceded the rate limit)
-    //             if (!data.code) {
-    //                 console.log(data);
-    //                 let countObj = {}
-    //                 // need the total events for each hour & the number of hour samples, store in countObj 
-    //                 data.forEach((item) => {
-    //                     let hour = item.hour
-    //                     if (!countObj[`${hour}`]) {
-    //                         countObj[`${hour}`] = {
-    //                             [`total${variable}`]: item[`${variable}`],
-    //                             [`numberOf${variable}`]: 1
-    //                         }
-    //                     } else {
-    //                         countObj[`${hour}`].totalImpressions = countObj[`${hour}`].totalImpressions + item.impressions
-    //                         countObj[`${hour}`].numberOfImpressions++
-    //                     }
-    //                 })
-    //                 console.log(countObj);
-    //                 // get the average events for each hour
-    //                 for (let item in countObj) {
-    //                     // console.log(countObj[`${item}`]);
-    //                     countObj[`${item}`]['averageImpressions'] = parseInt(countObj[`${item}`].totalImpressions / countObj[`${item}`].numberOfImpressions)
-    //                 }
-    //                 console.log(countObj);
-    //                 // format the data to send to App.js
-    //                 const graphData = {
-    //                     graphType: "column",
-    //                     graphTitle: "Average Impressions vs. Hour",
-    //                     axisXTitle: "Hour (24hr clock)",
-    //                     axisYTitle: "Average Impressions",
-    //                     showInLegend: false,
-    //                     legendText: "",
-    //                     data: [],
-    //                     curveFit: []
-    //                 }
-    //                 console.log(graphData);
-    //                 // put the data in the right format for the graph
-    //                 const countArray = Object.entries(countObj)
-    //                 console.log(countArray);
-
-    //                 graphData.data = countArray.map((item) => {
-    //                     console.log(item);
-    //                     return { label: item[0], y: item[1].averageImpressions, x: parseInt(item[0]) }
-    //                 })
-    //                 console.log(graphData);
-
-    //                 // regression
-    //                 // graphData.curveFit = graphData.data.map((item) => {
-    //                 //     console.log(item);
-    //                 //     let x = item.x;
-    //                 //     let y = (-0.5326) * Math.sin(x) + 7.2717
-    //                 //     console.log(x, y);
-    //                 //     return { "label": item.label, y: y }
-    //                 // })
-    //                 // graph analysis
-    //                 const analysis = "For each bar, on average this many ads are being displayed at that point in the day (Assumption: An 'impression' refers to the display of an ad)."
-    //                 const graphDataPlusAnalysis = [graphData, analysis]
-    //                 // send the graph data up to App.js
-    //                 this.props.getVariables(graphDataPlusAnalysis)
-    //             } else {
-    //                 // let the user know they have exceded the rate limit, and to wait up to 30sec before making another one (tokens are replenished after 30 sec)
-    //                 alert(data.message)
-    //             }
-    //         }).catch((error) => {
-    //             // console.log(error);
-    //         })
+    // Call one of these functions for each combination to put the data from the API in the correct format for the graph
+    // getAveragelData = () => {
     // }
-
     // getTotalData = () => {
-
     // }
 
     handleChange = (event) => {
         // if the selector checkbox value has the word Average in it
-
         if (event.target.className === "selectorRadio") {
             // if a selector radio input was clicked
             // check to see if any normal, avgerage or total value has been saved in state, if so, automatically click that one
@@ -994,7 +562,6 @@ class SelectData extends Component {
                 const averageRadioInputs = allRadioInputs.filter((input) => {
                     return re.test(input.value)
                 })
-                // console.log(averageRadioInputs);
                 // fill all the inputs withe the value ___Average
                 averageRadioInputs.forEach((input) => {
                     input.checked = true
@@ -1008,7 +575,6 @@ class SelectData extends Component {
                 const totalRadioInputs = allRadioInputs.filter((input) => {
                     return re.test(input.value)
                 })
-                // console.log(totalRadioInputs);
                 // fill all the inputs withe the value ___Average
                 totalRadioInputs.forEach((input) => {
                     input.checked = true
@@ -1150,21 +716,29 @@ class SelectData extends Component {
     
                             <button>Create Graph</button>
                         </form>
-                            {/* <div class="buttonContainer">
+                        <div className="selectMapContainer">
+                            <h2>View POI data on map</h2>
+                            <div class="mapButtonContainer">
                                 <button onClick={this.props.mapButtonClick}>Map</button>
-                            </div> */}
+                            </div>
+                        </div>
                     </div>
                     :
                     // if the user has not selected a poi, show the poi slector input
-                    <form className="selectPOIForm">
+                    <form 
+                    className="selectPOIForm" 
+                    >
                         <h2>Select a POI</h2>
                         <label htmlFor=""></label>
-                        <select className="selectPOI" onChange={this.handlePoiChange}>
+                        <select 
+                        className="selectPOI" 
+                        onChange={this.handlePoiChange}
+                        >
                             <option>POI</option>
-                            <option value="eqworks">EQ Works</option>
-                            <option value="cntower">CN Tower</option>
-                            <option value="niagarafalls">Niagara Falls</option>
-                            <option value="vancouverharbour">Vancouver Harbour</option>
+                            <option value="eqworks" className="poiChoices">EQ Works</option>
+                            <option value="cntower" className="poiChoices">CN Tower</option>
+                            <option value="niagarafalls" className="poiChoices">Niagara Falls</option>
+                            <option value="vancouverharbour" className="poiChoices">Vancouver Harbour</option>
                         </select>
                     </form>
                 }

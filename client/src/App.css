@@ -219,6 +219,11 @@ label {
   padding: 20px 0;
 }
 
+.graphMain .flexContainer {
+  display: flex;
+  justify-content: center;
+}
+
 .graphContainer {
   /* background-image: linear-gradient(90deg, rgba(3, 78, 144, 0.9) 0%, rgba(25, 180, 215, 0.9) 100%); */
   /* background-color: darkmagenta; */
@@ -258,6 +263,39 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.2rem;
   font-size: 2.0rem;
+}
+
+/* MAP STYLES */
+.mapMarker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: red;
+  position: relative;
+}
+
+.innerCircle {
+  /* content: ""; */
+  position: absolute;
+  background-color: green;
+  width: 80%;
+  left: 0;
+  top: 0;
+  z-index: 10;
+}
+
+.selectMapContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.mapButtonContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px 0;
 }
 
 /* FOOTER STYLES */

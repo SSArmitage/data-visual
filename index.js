@@ -44,7 +44,7 @@ const pool = new pg.Pool({
 
 // RATE LIMITING MIDDLEWEAR FUNCTION
 // using sessions to track how many times a user has made a request to an api endpoint
-// allow the user to start with 20 tokens, decrement for each request
+// allow the user to start with 2 tokens, decrement for each request
 const rateLimiterMiddleware = (req, res, next) => {
     // get the request session, now can create session variables on sess i.e. sess.tokens
     //  once a session variables is set, will be able to track it. Use this as the token counting mechanism (temporary unique id and token count will persist for the duration of the session)

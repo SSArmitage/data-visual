@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import SelectData from './SelectData';
 import DisplayData from './DisplayData';
+import Map from './Map'
 
 class App extends Component {
   constructor() {
@@ -11,13 +12,12 @@ class App extends Component {
         userSelectedVariables: false,
         variables: {}
       },
-      mapButtonClicked: false
+      mapButtonClicked: false,
+      poi: {}
     }
   }
 
   handleVariables = (variables) => {
-    console.log(variables);
-
     this.setState({
       data: {
         userSelectedVariables: true,
@@ -27,7 +27,6 @@ class App extends Component {
   }
 
   handleCreateNewGraph = () => {
-    // console.log(`New graph time!`);
     this.setState({
       data: {
         userSelectedVariables: false,
@@ -37,9 +36,26 @@ class App extends Component {
   }
 
   handleMapButtonClick = () => {
-    console.log("I want a map!");
     this.setState({
+      data: {
+        userSelectedVariables: true
+      },
       mapButtonClicked: true
+    })
+  }
+
+  handlePoiChoice = (poiData) => {
+    this.setState({
+      poi: poiData[0]
+    })
+  }
+
+  handleNewPoi = () => {
+    this.setState({
+      data: {
+        userSelectedVariables: false
+      },
+      mapButtonClicked: false
     })
   }
 
@@ -64,10 +80,20 @@ class App extends Component {
             {this.state.data.userSelectedVariables
               ?
               <div className="graphMain">
-                <div className="wrapper">
+                <div className="wrapper flexContainer">
+                  {this.state.mapButtonClicked
+                  ?
+                  // <div id='map' style='width: 400px; height: 300px;'></div> 
+                  <div>
+                    <Map
+                    passPOI={this.state.poi} />
+                    <button onClick={this.handleNewPoi}>New POI</button>
+                  </div>
+                  :
                   <DisplayData
-                    passVariables={this.state.data.variables}
-                    createNewGraph={this.handleCreateNewGraph} />
+                  passVariables={this.state.data.variables}
+                  createNewGraph={this.handleCreateNewGraph} />
+                  }
                 </div>
               </div>
               :
@@ -75,7 +101,8 @@ class App extends Component {
                 <div className="wrapper">
                   <SelectData
                     getVariables={this.handleVariables}
-                    mapButtonClick={this.handleMapButtonClick} />
+                    mapButtonClick={this.handleMapButtonClick}
+                    passPOI={this.handlePoiChoice} />
                 </div>
               </div>
             }
@@ -83,13 +110,13 @@ class App extends Component {
         {this.state.data.userSelectedVariables
         ?
           <footer className="graphFooter">
-            <div class="wrapper flexContainer">
+            <div className="wrapper flexContainer">
               <p>Built by Sarah Armitage</p>
             </div>
           </footer>
         :
           <footer className="selectFooter">
-            <div class="wrapper flexContainer">
+            <div className="wrapper flexContainer">
               <p>Built by Sarah Armitage</p>
             </div>
           </footer>
