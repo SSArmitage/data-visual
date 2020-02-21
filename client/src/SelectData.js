@@ -735,7 +735,7 @@ class SelectData extends Component {
                         onChange={this.handlePoiChange}
                         >
                             <option>POI</option>
-                            <option value="eqworks" className="poiChoices">EQ Works</option>
+                            {/* <option value="eqworks" className="poiChoices">EQ Works</option> */}
                             <option value="cntower" className="poiChoices">CN Tower</option>
                             <option value="niagarafalls" className="poiChoices">Niagara Falls</option>
                             <option value="vancouverharbour" className="poiChoices">Vancouver Harbour</option>

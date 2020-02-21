@@ -214,12 +214,14 @@ label {
 /* GRAPHS STYLES */
 .graphMain {
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
+  min-height: 85vh;
   background-color: black;
   padding: 20px 0;
 }
 
 .graphMain .flexContainer {
+  min-height: 85vh;
   display: flex;
   justify-content: center;
 }
@@ -296,6 +298,18 @@ h3 {
   justify-content: center;
   align-items: center;
   margin: 40px 0;
+}
+
+.mapContainer {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mapButton {
+  align-self: center;
+  margin: 10px 0;
 }
 
 /* FOOTER STYLES */

@@ -84,10 +84,12 @@ class App extends Component {
                   {this.state.mapButtonClicked
                   ?
                   // <div id='map' style='width: 400px; height: 300px;'></div> 
-                  <div>
+                  <div className="mapContainer">
                     <Map
                     passPOI={this.state.poi} />
-                    <button onClick={this.handleNewPoi}>New POI</button>
+                    <button 
+                    className="mapButton"
+                    onClick={this.handleNewPoi}>New POI</button>
                   </div>
                   :
                   <DisplayData

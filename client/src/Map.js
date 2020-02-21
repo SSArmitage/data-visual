@@ -23,7 +23,7 @@ export default class Map extends Component {
             viewport: {
                 latitude: 43.6426,
                 longitude: -79.3871,
-                zoom: 8,
+                zoom: 7,
                 bearing: 0,
                 pitch: 0,
                 width: 500,
