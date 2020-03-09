@@ -1,6 +1,6 @@
 # data-visual
 
-A full-stack application that I built while playing around with back-end technologies. It implements rate limiting server-side and displays data via graphs client-side. Built using React, Node, Express, and PostgreSQL
+A full-stack application that I built while playing around with back-end technologies. It implements rate limiting server-side and grabs data from an API and displays it via graphs client-side. Built using React, Node, Express, and PostgreSQL
 (curve fitting the data was done using Python).\
 Note: the only graphs that are currently displaying are Total Events vs. Date & Average Events vs. Hour.\
 Note: graph logic still needs to be abstracted.
