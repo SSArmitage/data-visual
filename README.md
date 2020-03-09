@@ -3,7 +3,7 @@
 A full-stack application that I built while playing around with back-end technologies. It implements rate limiting server-side and grabs data from an API and displays it via graphs client-side. Built using React, Node, Express, and PostgreSQL
 (curve fitting the data was done using Python).\
 Note: the only graphs that are currently displaying are Total Events vs. Date & Average Events vs. Hour.\
-Note: graph logic still needs to be abstracted.
+Note: the graph choice logic is a bit convoluted at the moment, it still needs to be abstracted.
 
 View Live: https://visualize-data-graphical.herokuapp.com
 
